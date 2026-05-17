@@ -1,0 +1,288 @@
+import { reviewService } from './python/reviewService'
+import { supabaseService } from './supabase'
+import { apiRequest } from './python/api'
+
+// Get backend type from environment
+const backendType = import.meta.env.VITE_BACKEND_TYPE || 'python'
+
+// Define interfaces for backend responses
+interface ReviewStatus {
+  id: string
+  status: 'submitted' | 'pending' | 'in_review' | 'ea_review' | 'approved' | 'rejected' | 'deferred' | 'reviewed'
+  decision: string | null
+  report_json: any
+  domain_scores: any[]
+  findings: any[]
+  adrs: any[]
+  actions: any[]
+  submitted_at: string | null
+  reviewed_at: string | null
+}
+
+interface ReviewData {
+  solution_name: string
+  scope_tags: string[]
+  sa_user_id: string
+  llm_model?: string
+}
+
+interface DraftData {
+  solution_name: string
+  scope_tags: string[]
+  sa_user_id: string
+  form_data?: any
+  status?: 'draft' | 'submitted' | 'ready_for_review'
+}
+
+interface ReviewResult {
+  success: boolean
+  reviewId: string
+  report: any
+  decision: string
+}
+
+// Unified backend service that routes to appropriate backend
+export const backendService = {
+  // Authentication
+  async login(email: string, password: string) {
+    if (backendType === 'supabase') {
+      return await supabaseService.signIn(email, password)
+    } else {
+      // Python backend uses token-based auth, login handled by API
+      return await apiRequest('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      })
+    }
+  },
+
+  async signOut() {
+    if (backendType === 'supabase') {
+      return await supabaseService.signOut()
+    } else {
+      localStorage.removeItem('token')
+      // Python backend doesn't have explicit sign out
+    }
+  },
+
+  async getCurrentUser() {
+    if (backendType === 'supabase') {
+      return await supabaseService.getCurrentUser()
+    } else {
+      const token = localStorage.getItem('token')
+      if (token) {
+        // Decode JWT token (simplified)
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]))
+          return payload.user || { id: payload.sub, email: payload.email }
+        } catch {
+          return null
+        }
+      }
+      return null
+    }
+  },
+
+  async getSession() {
+    if (backendType === 'supabase') {
+      return await supabaseService.getSession()
+    } else {
+      const token = localStorage.getItem('token')
+      return token ? { session: { user: { token } } } : null
+    }
+  },
+
+  // Reviews
+  async getReviews(userId?: string) {
+    if (backendType === 'supabase') {
+      return await supabaseService.getReviews(userId)
+    } else {
+      return await reviewService.getUserReviews(userId)
+    }
+  },
+
+  async getReview(reviewId: string): Promise<ReviewStatus> {
+    if (backendType === 'supabase') {
+      const status = await supabaseService.getReview(reviewId)
+      return {
+        id: status.id,
+        status: status.status,
+        decision: (status as any).decision,
+        report_json: (status as any).report_json,
+        domain_scores: (status as any).domain_scores || [],
+        findings: (status as any).findings || [],
+        adrs: (status as any).adrs || [],
+        actions: (status as any).actions || [],
+        submitted_at: (status as any).submitted_at,
+        reviewed_at: (status as any).reviewed_at
+      }
+    } else {
+      return await reviewService.getReviewStatus(reviewId)
+        adrs: (data as any).adrs || [],
+        actions: (data as any).actions || [],
+        submitted_at: (data as any).submitted_at,
+        reviewed_at: (data as any).reviewed_at
+      }
+    }
+  },
+
+  async getReviewStatus(reviewId: string): Promise<ReviewStatus> {
+    if (backendType === 'supabase') {
+      const status = await supabaseService.getReview(reviewId)
+      return {
+        id: status.id,
+        status: status.status,
+        decision: status.decision,
+        report_json: status.report_json,
+        domain_scores: status.domain_scores || [],
+        findings: status.findings || [],
+        adrs: status.adrs || [],
+        actions: status.actions || [],
+        submitted_at: status.submitted_at,
+        reviewed_at: status.reviewed_at
+      }
+    } else {
+      const data = await reviewService.getReviewStatus(reviewId)
+      return {
+        id: data.id,
+        status: data.status,
+        decision: data.decision,
+        report_json: data.report_json,
+        domain_scores: data.domain_scores || [],
+        findings: data.findings || [],
+        adrs: data.adrs || [],
+        actions: data.actions || [],
+        submitted_at: data.submitted_at,
+        reviewed_at: data.reviewed_at
+      }
+    }
+  },
+
+  async createReview(data: ReviewData) {
+    if (backendType === 'supabase') {
+      return await supabaseService.createReview(data)
+    } else {
+      return await reviewService.createReview(data)
+    }
+  },
+
+  async updateReview(reviewId: string, data: any) {
+    if (backendType === 'supabase') {
+      return await supabaseService.updateReview(reviewId, {
+        ...data,
+        updated_at: new Date().toISOString()
+      })
+    } else {
+      return await reviewService.updateDraft(reviewId, data)
+    }
+  },
+
+  // Artefacts
+  async uploadArtefacts(reviewId: string, artefacts: {
+    domain: string
+    name: string
+    type: string
+    file: File
+  }[]) {
+    if (backendType === 'supabase') {
+      return await Promise.all(
+        artefacts.map(artefact =>
+          supabaseService.uploadArtefact(
+            reviewId,
+            artefact.domain,
+            artefact.name,
+            artefact.type,
+            artefact.file
+          )
+        )
+      )
+    } else {
+      return await reviewService.uploadArtefacts(reviewId, artefacts)
+    }
+  },
+
+  async getReviewArtefacts(reviewId: string) {
+    if (backendType === 'supabase') {
+      return await supabaseService.getReviewArtefacts(reviewId)
+    } else {
+      return await reviewService.getReviewArtefacts(reviewId)
+    }
+  },
+
+  async getArtefactChunks(reviewId: string, domainSlug?: string, limit: number = 50) {
+    if (backendType === 'supabase') {
+      return await supabaseService.getArtefactChunks(reviewId, domainSlug, limit)
+    } else {
+      return await reviewService.getReviewChunks?.(reviewId, domainSlug, limit) || []
+    }
+  },
+
+  // ARB Review Process
+  async markReadyForReview(reviewId: string): Promise<ReviewResult> {
+    if (backendType === 'supabase') {
+      // Update status to submitted
+      await supabaseService.updateReview(reviewId, { status: 'submitted' })
+      
+      // Trigger ARB review via edge function
+      const result = await supabaseService.triggerARBReview(reviewId, {})
+      return {
+        success: true,
+        reviewId,
+        decision: result.decision,
+        report: result.report
+      }
+    } else {
+      return await reviewService.markReadyForReview(reviewId)
+    }
+  },
+
+  async triggerReviewOrchestrator(reviewId: string): Promise<ReviewResult> {
+    if (backendType === 'supabase') {
+      return await supabaseService.triggerARBReview(reviewId, {})
+    } else {
+      return await reviewService.triggerReviewOrchestrator(reviewId)
+    }
+  },
+
+  
+  // Knowledge Base
+  async searchKnowledgeBase(query: string, category?: string, limit?: number) {
+    if (backendType === 'supabase') {
+      return await supabaseService.searchKnowledgeBase(query, category, limit)
+    } else {
+      // Python backend doesn't have direct knowledge base search
+      return []
+    }
+  },
+
+  async populateKnowledgeBase() {
+    if (backendType === 'supabase') {
+      // Supabase doesn't need population - it's already populated
+      return { success: true }
+    } else {
+      return await reviewService.validateCompleteness?.('dummy') || { isComplete: true }
+    }
+  },
+
+  // Override functions
+  async overrideReview(reviewId: string, decision: string, rationale: string) {
+    if (backendType === 'supabase') {
+      return await supabaseService.updateReview(reviewId, { 
+        decision, 
+        rationale,
+        ea_override_notes: rationale,
+        ea_overridden_at: new Date().toISOString()
+      })
+    } else {
+      return await reviewService.overrideReview(reviewId, decision, rationale)
+    }
+  }
+}
+
+// Export services for direct access
+export { reviewService }
+export { supabaseService }
+
+// Export backend type for components to check
+export const isSupabaseBackend = () => backendType === 'supabase'
+export const isPythonBackend = () => backendType === 'python'
