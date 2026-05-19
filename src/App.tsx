@@ -4,8 +4,7 @@ import { useAuthStore, initializeSession } from './stores/authStore'
 import { isAdmin, isSuperAdmin } from './types/admin'
 import LoginPage from './pages/LoginPage'
 import Dashboard from './pages/Dashboard'
-import ARBSubmission from './pages/ARBSubmission'
-import EARRSubmission from './pages/EARRSubmission'
+import SubmissionWizard from './pages/SubmissionWizard'
 import ReviewDashboard from './pages/ReviewDashboard'
 import ReviewStatus from './pages/ReviewStatus'
 import Layout from './components/layout/Layout'
@@ -112,17 +111,17 @@ function App() {
           <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1><p className="text-gray-600 mt-2">Settings page coming soon</p></div>} />
           <Route path="submission/new" element={
             <ProtectedRoute>
-              <ARBSubmission />
+              <SubmissionWizard />
             </ProtectedRoute>
           } />
           <Route path="earr/new" element={
             <ProtectedRoute>
-              <EARRSubmission />
+              <SubmissionWizard />
             </ProtectedRoute>
           } />
           <Route path="earr/edit/:reviewId" element={
             <ProtectedRoute>
-              <EARRSubmission />
+              <SubmissionWizard />
             </ProtectedRoute>
           } />
           <Route path="review/:submissionId" element={

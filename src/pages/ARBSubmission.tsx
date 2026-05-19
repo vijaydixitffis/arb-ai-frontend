@@ -9,8 +9,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card'
 import { ChevronLeft, ChevronRight, Send } from 'lucide-react'
 import ARBHeader from '../components/ARB/ARBHeader'
 import NFRCriteriaSection from '../components/ARB/NFRCriteriaSection'
-import { reviewService } from '../services/python/reviewService'
-import { artefactService } from '../services/python/artefactService'
+import { reviewService } from '../services/backendConfig'
 import { validateSubmissionCompleteness, getValidationSummary } from '../utils/schemaValidation'
 
 export default function ARBSubmission() {
@@ -50,7 +49,7 @@ export default function ARBSubmission() {
           }
 
           // Load previously uploaded artefacts
-          const uploadedArtefacts = await artefactService.getReviewArtefacts(state.reviewId)
+          const uploadedArtefacts = await reviewService.getReviewArtefacts(state.reviewId)
           
           // Group artefacts by domain - dynamically create keys for all domains found
           const artefactsByDomain: Record<string, Array<{ id?: string; name: string; type: string; fileName: string; file: File | null }>> = {}
@@ -528,7 +527,7 @@ export default function ARBSubmission() {
                         if (existingArtefactIndex !== undefined && existingArtefactIndex >= 0) {
                           const existingArtefact = artefacts[domainSlug][existingArtefactIndex]
                           if (existingArtefact.id) {
-                            await artefactService.deleteArtefact(existingArtefact.id)
+                            await reviewService.deleteArtefact(existingArtefact.id)
                           }
                         }
 
@@ -602,7 +601,7 @@ export default function ARBSubmission() {
                           <button
                             onClick={async () => {
                               try {
-                                await artefactService.deleteArtefact(artefact.id!)
+                                await reviewService.deleteArtefact(artefact.id!)
                                 setArtefacts({
                                   ...artefacts,
                                   [domainSlug]: artefacts[domainSlug].filter((_, i) => i !== index)

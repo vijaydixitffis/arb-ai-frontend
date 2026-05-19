@@ -1,705 +1,686 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import {
+  Plus, Download, Filter, ArrowRight, Clock, Flag,
+  CheckCircle, XCircle, Zap, AlertTriangle,
+} from 'lucide-react'
 import { useAuthStore } from '../stores/authStore'
 import { useMetadataStore } from '../stores/metadataStore'
 import { reviewService } from '../services/backendConfig'
 import { toARBRef } from '../utils/reviewRef'
-import { Button } from '../components/ui/Button'
-import { Input } from '../components/ui/Input'
-import { Textarea } from '../components/ui/Textarea'
-import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card'
-import { FileText, Plus, Eye, CheckCircle, Clock, CheckCircle2, XCircle, ClipboardList, Briefcase, MessageSquare, Users, TrendingUp, Target, Tag, Layers, LayoutGrid, X, ChevronLeft, ChevronRight, ArrowRight, Loader2 } from 'lucide-react'
+import { Pill, DomainStrip, Sparkline } from '../components/ui/ds'
+import type { PillTone, DomainSlug } from '../components/ui/ds'
 
-type Notification = { type: 'success' | 'error'; message: string }
+// ── Types ────────────────────────────────────────────────────────────────────
 
-export default function Dashboard() {
-  const navigate = useNavigate()
-  const user = useAuthStore((state) => state.user)
-  const [submissions, setSubmissions] = useState<any[]>([])
-  const [reviews, setReviews] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [startingReviewId, setStartingReviewId] = useState<string | null>(null)
-  const [notification, setNotification] = useState<Notification | null>(null)
-  // EARR Modal states
-  const [isEarrModalOpen, setIsEarrModalOpen] = useState(false)
-  const [activeEarrTab, setActiveEarrTab] = useState(1)
-  const { domains, loadMetadata, ptxGates, architectureDispositions } = useMetadataStore()
-  const [earrFormData, setEarrFormData] = useState({
-    project_name: '',
-    problem_statement: '',
-    stakeholders: [] as string[],
-    business_drivers: [] as string[],
-    target_business_outcomes: ''
-  })
-  const [earrPtxGate, setEarrPtxGate] = useState('')
-  const [earrArchitectureDisposition, setEarrArchitectureDisposition] = useState('')
-  const [selectedDomains, setSelectedDomains] = useState<string[]>([])
+type SubmissionStatus =
+  | 'drafting' | 'queued' | 'analysing' | 'submitted'
+  | 'review_pending' | 'agent_failed'
+  | 'review_ready' | 'ea_reviewing'
+  | 'approved' | 'conditionally_approved' | 'rejected' | 'deferred' | 'closed' | 'returned'
 
-  useEffect(() => {
-    fetchData()
-    loadMetadata()
-  }, [])
+interface Review {
+  id: string
+  solution_name: string
+  status: SubmissionStatus
+  decision: string | null
+  report_json: any
+  created_at: string
+  submitted_at: string | null
+  // NOTE: domain_scores not included here — requires service join (not yet added)
+  // NOTE: sla_hours, ai_confidence — not in DB yet
+}
 
-  const showNotification = (type: 'success' | 'error', message: string) => {
-    setNotification({ type, message })
-    setTimeout(() => setNotification(null), 6000)
+// ── Status → kanban column ────────────────────────────────────────────────────
+
+type Column = 'drafting' | 'queued' | 'analysing' | 'awaitingEA' | 'decided'
+
+function toColumn(status: SubmissionStatus): Column {
+  switch (status) {
+    case 'drafting':                                                     return 'drafting'
+    case 'queued': case 'review_pending': case 'agent_failed':           return 'queued'
+    case 'analysing': case 'submitted':                                  return 'analysing'
+    case 'review_ready': case 'ea_reviewing':                            return 'awaitingEA'
+    default:                                                             return 'decided'
   }
+}
 
-  const handleMarkReadyForReview = async (reviewId: string) => {
-    if (!confirm('Start the AI review for this submission? The analysis runs in the background — check back in a couple of minutes.')) return
-    try {
-      setStartingReviewId(reviewId)
-      // Update status (fast DB call)
-      await reviewService.markReadyForReview(reviewId)
-      // Fire the orchestrator without awaiting — LLM processing takes ~60s
-      reviewService.triggerReviewOrchestrator(reviewId).catch((err: unknown) => {
-        console.error('Orchestrator error (background):', err)
-      })
-      showNotification('success', 'Review started! The AI is analysing your submission. Check back in a couple of minutes for the results.')
-      // Await fetchData so submissions state is updated before finally clears startingReviewId
-      await fetchData()
-    } catch (error) {
-      console.error('Error starting review:', error)
-      showNotification('error', `Failed to start review: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    } finally {
-      setStartingReviewId(null)
-    }
-  }
+// ── Decision meta ────────────────────────────────────────────────────────────
 
-  const fetchData = async () => {
-    try {
-      const isSolutionArchitect = user?.role === 'solution_architect'
-      const isEnterpriseArchitect = user?.role === 'enterprise_architect' || user?.role === 'arb_admin'
+const DECISION_META: Record<string, { label: string; tone: PillTone }> = {
+  approve:                 { label: 'Approved',           tone: 'green' },
+  approved:                { label: 'Approved',           tone: 'green' },
+  approve_with_conditions: { label: 'Approve · w/ Actions', tone: 'teal' },
+  conditionally_approved:  { label: 'Approve · w/ Actions', tone: 'teal' },
+  defer:                   { label: 'Deferred',           tone: 'amber' },
+  deferred:                { label: 'Deferred',           tone: 'amber' },
+  reject:                  { label: 'Rejected',           tone: 'red' },
+  rejected:                { label: 'Rejected',           tone: 'red' },
+  returned:                { label: 'Returned',           tone: 'amber' },
+  closed:                  { label: 'Closed',             tone: 'gray' },
+}
 
-      if (isSolutionArchitect) {
-        // Fetch reviews from Supabase for current user
-        const userReviews = await reviewService.getUserReviews()
-        setSubmissions(userReviews.map((review: any) => ({
-          id: review.id,
-          project_name: review.solution_name,
-          status: review.status,
-          created_date: new Date(review.created_at).toISOString().split('T')[0],
-          overall_progress: ['ea_reviewing','review_ready','approved','conditionally_approved','rejected','deferred','closed'].includes(review.status) ? 100 : ['analysing','queued'].includes(review.status) ? 70 : review.status === 'drafting' ? 30 : 50,
-        })))
-      }
+function decisionOf(r: Review): { label: string; tone: PillTone } {
+  const key = (r.decision ?? r.status ?? '').toLowerCase()
+  return DECISION_META[key] ?? { label: r.status.replace(/_/g, ' '), tone: 'gray' }
+}
 
-      if (isEnterpriseArchitect) {
-        // For EA, fetch all reviews
-        const allReviews = await reviewService.getAllReviews()
-        setReviews(allReviews.map((review: any) => ({
-          id: review.id,
-          submission_id: review.id,
-          project_name: review.solution_name,
-          status: review.status,
-          agent_recommendation: review.decision || 'pending',
-          created_date: new Date(review.created_at).toISOString().split('T')[0],
-        })))
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
-  const isSolutionArchitect = user?.role === 'solution_architect'
-  const isEnterpriseArchitect = user?.role === 'enterprise_architect' || user?.role === 'arb_admin'
+function ptxGate(r: Review): string | null {
+  return r.report_json?.form_data?.ptx_gate ?? r.report_json?.form_data?.ptxGate ?? null
+}
 
-  // Calculate statistics
-  const totalSubmissions = submissions.length
-  const pendingReviews = reviews.filter(r => ['review_ready', 'ea_reviewing', 'queued', 'analysing', 'pending'].includes(r.status)).length
-  const approved = submissions.filter(s => s.status === 'approved').length
-  const rejected = submissions.filter(s => s.status === 'rejected').length
+function timeAgo(iso: string | null): string {
+  if (!iso) return ''
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60_000)
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  const days = Math.floor(hrs / 24)
+  return days === 1 ? 'yesterday' : `${days}d ago`
+}
+
+// ── Governance KPI strip ─────────────────────────────────────────────────────
+
+function GovernanceStrip({ reviews, isSA }: { reviews: Review[]; isSA: boolean }) {
+  const inflight  = reviews.filter(r => ['queued','analysing','submitted','review_ready','ea_reviewing'].includes(r.status)).length
+  const awaitingEA = reviews.filter(r => ['review_ready','ea_reviewing'].includes(r.status)).length
+  const approved  = reviews.filter(r => ['approved','conditionally_approved'].includes(r.status)).length
+  const returned  = reviews.filter(r => ['rejected','deferred','returned','closed'].includes(r.status)).length
+
+  const pending    = reviews.filter(r => r.status === 'review_ready').length
+  const total      = reviews.length
+
+  const saStats = [
+    { k: 'In flight',    v: inflight,  sub: `across ${Math.max(1, inflight)} gate${inflight !== 1 ? 's' : ''}`, color: '#00B09C', spark: [3,4,3,5,4,inflight] },
+    { k: 'Awaiting EA',  v: awaitingEA, sub: 'pending decision', color: '#D98A00', spark: [1,2,1,2,3,awaitingEA] },
+    { k: 'Approved YTD', v: approved,  sub: 'total approved',   color: '#1FA567', spark: [6,7,8,9,10,approved] },
+    { k: 'Returned',     v: returned,  sub: 'returned or deferred', color: '#E59500', spark: [3,2,4,2,3,returned] },
+  ]
+  const eaStats = [
+    { k: 'Awaiting decision', v: pending,   sub: 'in your queue',         color: '#D74A40', spark: [3,4,3,5,4,pending] },
+    { k: 'AI low-confidence', v: 0,         sub: 'flagged for deep review', color: '#E59500', spark: [1,2,1,2,0,0] },
+    { k: 'Decisions this wk', v: approved,  sub: 'approved this period',   color: '#1FA567', spark: [6,7,8,9,10,approved] },
+    { k: 'Total reviews',     v: total,     sub: 'all time',               color: '#00B09C', spark: [3,2,4,2,3,total] },
+  ]
+  const stats = isSA ? saStats : eaStats
+
+  return (
+    <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+      {stats.map(s => (
+        <div key={s.k} className="bg-white border border-line rounded-lg shadow-sh-sm" style={{ padding: '16px 18px' }}>
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="font-cond font-semibold text-[12px] uppercase tracking-[0.16em] text-ink-400">
+                {s.k}
+              </div>
+              <div className="font-cond font-bold text-ink-900 mt-1.5 leading-none" style={{ fontSize: 34 }}>
+                {s.v}
+              </div>
+            </div>
+            <Sparkline values={s.spark} color={s.color} />
+          </div>
+          <div className="text-[13.5px] text-ink-500 mt-2">{s.sub}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ── SA Kanban card ────────────────────────────────────────────────────────────
+
+function KanbanCard({ review, col, onClick }: {
+  review: Review
+  col: Column
+  onClick: () => void
+}) {
+  const { domains } = useMetadataStore()
+  const gate = ptxGate(review)
+  const decision = decisionOf(review)
+  const ref = toARBRef(review.id, review.created_at)
+
+  return (
+    <div
+      onClick={onClick}
+      className="bg-white border border-line rounded-lg cursor-pointer group"
+      style={{ padding: 14, marginBottom: 10, transition: 'box-shadow .15s, transform .15s' }}
+      onMouseEnter={e => {
+        ;(e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 0 rgba(11,27,46,0.04), 0 4px 14px rgba(11,27,46,0.06)'
+        ;(e.currentTarget as HTMLDivElement).style.transform = 'translateY(-1px)'
+      }}
+      onMouseLeave={e => {
+        ;(e.currentTarget as HTMLDivElement).style.boxShadow = ''
+        ;(e.currentTarget as HTMLDivElement).style.transform = ''
+      }}
+    >
+      {/* Header row */}
+      <div className="flex justify-between items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="font-mono text-[12px] text-ink-400 tracking-[0.04em]">{ref}</div>
+          <div className="font-cond font-semibold text-[15.5px] text-ink-900 mt-1 leading-snug truncate">
+            {review.solution_name}
+          </div>
+        </div>
+        {gate && <Pill tone="navy">{gate}</Pill>}
+      </div>
+
+      {/* State-specific row */}
+      {col === 'drafting' && (
+        <div className="mt-2.5">
+          <div className="flex justify-between text-[13px] text-ink-500 mb-1">
+            <span>{review.report_json?.artefact_uploads?.length ?? 0} artefacts</span>
+            <span>{timeAgo(review.created_at)}</span>
+          </div>
+          {/* simple progress indicator */}
+          <div className="h-[4px] rounded-full overflow-hidden bg-line-soft">
+            <div className="h-full rounded-full bg-teal-500" style={{ width: '35%' }} />
+          </div>
+        </div>
+      )}
+
+      {col === 'queued' && (review.status === 'review_pending' || review.status === 'agent_failed' ? (
+        <div className="mt-2.5 flex items-center gap-2 text-[13px]" style={{ color: '#B45309' }}>
+          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#F59E0B' }} />
+          {review.status === 'agent_failed' ? 'Agent failed — retry required' : 'Domains pending — retry required'}
+        </div>
+      ) : (
+        <div className="mt-2.5 flex items-center gap-2 text-[13px] text-ink-500">
+          <span className="w-2 h-2 rounded-full bg-teal-500 flex-shrink-0" />
+          Ready for AI agent
+          <span className="ml-auto text-[13px]">in queue</span>
+        </div>
+      ))}
+
+      {col === 'analysing' && (
+        <div className="mt-2.5">
+          <div className="flex items-center gap-2 text-[13px] text-teal-700 mb-1.5">
+            <span
+              className="w-2 h-2 rounded-full bg-teal-500 flex-shrink-0 animate-pulse"
+            />
+            AI agent analysing
+            <span className="ml-auto text-ink-500 text-[13px]">processing…</span>
+          </div>
+          <div className="h-[4px] rounded-full overflow-hidden bg-teal-100">
+            <div
+              className="h-full rounded-full bg-teal-500 animate-pulse"
+              style={{ width: '70%' }}
+            />
+          </div>
+        </div>
+      )}
+
+      {col === 'awaitingEA' && (
+        <>
+          {/* domain scores placeholder — populated once domain_scores join added */}
+          <div className="mt-2.5">
+            <DomainStrip scores={{}} domains={domains} />
+          </div>
+          <div className="mt-2.5 flex items-center gap-2">
+            <Pill tone="teal" dot>Awaiting EA decision</Pill>
+          </div>
+        </>
+      )}
+
+      {col === 'decided' && (
+        <>
+          <div className="mt-2.5">
+            <DomainStrip scores={{}} domains={domains} />
+          </div>
+          <div className="mt-2.5 flex items-center">
+            <Pill tone={decision.tone} dot>{decision.label}</Pill>
+            <span className="ml-auto text-[13px] text-ink-400">{timeAgo(review.submitted_at ?? review.created_at)}</span>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+// ── SA Kanban board ───────────────────────────────────────────────────────────
+
+const COLUMNS: { key: Column; title: string; subtitle: string }[] = [
+  { key: 'drafting',   title: 'Drafting',    subtitle: 'Editable' },
+  { key: 'queued',     title: 'Ready',       subtitle: 'AI queue' },
+  { key: 'analysing',  title: 'In analysis', subtitle: 'AI agent' },
+  { key: 'awaitingEA', title: 'Awaiting EA', subtitle: 'Decision pending' },
+  { key: 'decided',    title: 'Decided',     subtitle: 'Last 30 days' },
+]
+
+function SAKanban({ reviews, onOpen }: { reviews: Review[]; onOpen: (r: Review) => void }) {
+  const byCol = COLUMNS.reduce<Record<Column, Review[]>>((acc, c) => {
+    acc[c.key] = reviews.filter(r => toColumn(r.status) === c.key)
+    return acc
+  }, { drafting: [], queued: [], analysing: [], awaitingEA: [], decided: [] })
+
+  return (
+    <div className="grid gap-3.5" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
+      {COLUMNS.map(col => (
+        <div key={col.key} className="rounded-lg p-3" style={{ background: '#EEF2F6' }}>
+          <div className="flex items-baseline gap-1.5 mb-1 px-0.5">
+            <span className="font-cond font-bold text-[14px] uppercase tracking-[0.14em] text-ink-700">
+              {col.title}
+            </span>
+            <span className="text-ink-400 text-[13px] ml-auto">{byCol[col.key].length}</span>
+          </div>
+          <div className="text-ink-400 text-[12.5px] mb-2 px-0.5">{col.subtitle}</div>
+
+          {byCol[col.key].length === 0 ? (
+            <div className="border border-dashed border-line rounded-[8px] text-center text-ink-400 text-[13px] py-5">
+              —
+            </div>
+          ) : (
+            byCol[col.key].map(r => (
+              <KanbanCard key={r.id} review={r} col={col.key} onClick={() => onOpen(r)} />
+            ))
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ── SA Dashboard ──────────────────────────────────────────────────────────────
+
+function SADashboard({
+  reviews,
+  firstName,
+  loading,
+  onOpenReview,
+  onNew,
+}: {
+  reviews: Review[]
+  firstName: string
+  loading: boolean
+  onOpenReview: (r: Review) => void
+  onNew: () => void
+}) {
+  const awaitingEA = reviews.filter(r => ['review_ready', 'ea_reviewing'].includes(r.status)).length
+  const analysing  = reviews.filter(r => ['analysing', 'submitted', 'queued'].includes(r.status)).length
 
   return (
     <div className="p-8">
-      {notification && (
-        <div className={`fixed top-4 right-4 z-50 flex items-start gap-3 px-4 py-3 rounded-lg shadow-lg max-w-md text-sm ${
-          notification.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'
-        }`}>
-          <span className="flex-1">{notification.message}</span>
-          <button onClick={() => setNotification(null)} className="shrink-0 ml-2 opacity-60 hover:opacity-100">
-            <X className="w-4 h-4" />
+      {/* Page header */}
+      <div className="flex items-start mb-5">
+        <div>
+          <h1 className="font-cond font-bold text-ink-900 mb-1" style={{ fontSize: 30, lineHeight: 1.05 }}>
+            Welcome back, {firstName}.
+          </h1>
+          <p className="text-ink-500 text-[15px]">
+            {awaitingEA > 0 && (
+              <strong className="text-ink-700">{awaitingEA} submission{awaitingEA !== 1 ? 's' : ''} awaiting EA decision</strong>
+            )}
+            {awaitingEA > 0 && analysing > 0 && ' · '}
+            {analysing > 0 && `${analysing} in AI analysis`}
+            {awaitingEA === 0 && analysing === 0 && 'No active submissions in progress.'}
+          </p>
+        </div>
+        <div className="ml-auto flex gap-2.5">
+          <button
+            className="inline-flex items-center gap-2 h-9 px-3.5 rounded-[8px] border border-line bg-white text-ink-700 text-[14px] font-medium hover:bg-paper-2 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export
+          </button>
+          <button
+            onClick={onNew}
+            className="inline-flex items-center gap-2 h-9 px-3.5 rounded-[8px] bg-navy-700 text-white text-[14px] font-medium hover:bg-navy-800 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            New review request
           </button>
         </div>
-      )}
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-6 mb-8 text-white flex items-center justify-between">
-        <div>
-          <p className="text-teal-400 text-xs font-semibold uppercase tracking-widest mb-1">
-            Intelligent Architecture Governance
-          </p>
-          <h1 className="text-2xl font-bold text-white">
-            Welcome back, {user?.name?.split(' ')[0] ?? user?.name}
-          </h1>
-          <p className="text-slate-300 text-sm mt-1">
-            {isSolutionArchitect
-              ? submissions.length === 0
-                ? 'No active submissions — start an EA Review to begin.'
-                : `You have ${submissions.filter(s => ['drafting','queued','analysing','submitted','review_ready'].includes(s.status)).length} active submission${submissions.filter(s => ['drafting','queued','analysing','submitted','review_ready'].includes(s.status)).length !== 1 ? 's' : ''} in progress.`
-              : `${pendingReviews} review${pendingReviews !== 1 ? 's' : ''} awaiting your decision${pendingReviews > 0 ? ' — SLA clock is running.' : '.'}`
-            }
-          </p>
-        </div>
-        <div className="hidden lg:flex items-center gap-2 flex-shrink-0 ml-6">
-          {[
-            { label: '✓ Approve',        color: 'bg-green-500/20 text-green-400 border-green-500/30' },
-            { label: '⚡ w/ Actions',    color: 'bg-teal-500/20  text-teal-400  border-teal-500/30'  },
-            { label: '⏸ Defer',         color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-            { label: '✕ Reject',        color: 'bg-red-500/20   text-red-400   border-red-500/30'   },
-          ].map((d) => (
-            <span key={d.label} className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${d.color}`}>
-              {d.label}
-            </span>
-          ))}
-        </div>
       </div>
 
-      {/* Statistics Cards — SA */}
-      {isSolutionArchitect && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Total Submissions</p>
-                  <p className="text-3xl font-bold">{totalSubmissions}</p>
-                </div>
-                <div className="w-12 h-12 bg-teal-50 rounded-lg flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-teal-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Approved</p>
-                  <p className="text-3xl font-bold">{approved}</p>
-                </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CheckCircle2 className="w-6 h-6 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Rejected</p>
-                  <p className="text-3xl font-bold">{rejected}</p>
-                </div>
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                  <XCircle className="w-6 h-6 text-red-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <GovernanceStrip reviews={reviews} isSA />
 
-      {/* Governance KPI Cards — EA / Admin */}
-      {isEnterpriseArchitect && (() => {
-        const total    = reviews.length
-        const terminal = reviews.filter(r => ['approved','conditionally_approved','rejected','deferred','closed'].includes(r.status))
-        const approvedEA   = reviews.filter(r => ['approved','conditionally_approved'].includes(r.status)).length
-        const approvalRate = terminal.length > 0 ? Math.round((approvedEA / terminal.length) * 100) : 0
-        const pendingDecision = reviews.filter(r => r.status === 'review_ready').length
-        const returnedCount   = reviews.filter(r => r.status === 'returned').length
-        return (
-          <div className="mb-8">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">
-              Governance Overview
-            </p>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Total Reviews</p>
-                      <p className="text-3xl font-bold">{total}</p>
-                    </div>
-                    <div className="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center">
-                      <ClipboardList className="w-5 h-5 text-teal-600" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Pending Decision</p>
-                      <p className="text-3xl font-bold">{pendingDecision}</p>
-                    </div>
-                    <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                      <Clock className="w-5 h-5 text-amber-600" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Approval Rate</p>
-                      <p className="text-3xl font-bold">{approvalRate}<span className="text-lg font-medium text-gray-400">%</span></p>
-                    </div>
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                      <CheckCircle2 className="w-5 h-5 text-green-600" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Returned for Rework</p>
-                      <p className="text-3xl font-bold">{returnedCount}</p>
-                    </div>
-                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                      <XCircle className="w-5 h-5 text-orange-600" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        )
-      })()}
-
-
-      <div className="grid gap-6">
-        {loading ? (
-          <Card>
-            <CardContent className="p-6">
-              <p className="text-center text-gray-600">Loading...</p>
-            </CardContent>
-          </Card>
-        ) : isSolutionArchitect && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Recent Review Submissions</CardTitle>
-              <Button
-                onClick={() => setIsEarrModalOpen(true)}
-                className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white border-teal-600"
-              >
-                <Plus className="w-4 h-4" />
-                EA Review
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Project Name</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Status</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Submitted Date</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {submissions.map((submission) => (
-                      <tr key={submission.id} className="border-b hover:bg-gray-50">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-3">
-                            <FileText className="w-4 h-4 text-gray-500" />
-                            <div>
-                              <p className="font-medium">{submission.project_name}</p>
-                              <p className="text-sm text-gray-500">{toARBRef(submission.id, submission.created_date)}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`text-sm px-2 py-1 rounded ${
-                            submission.status === 'approved'               ? 'bg-green-100 text-green-800'  :
-                            submission.status === 'conditionally_approved' ? 'bg-teal-100 text-teal-800'    :
-                            submission.status === 'closed'                 ? 'bg-gray-200 text-gray-700'    :
-                            submission.status === 'rejected'               ? 'bg-red-100 text-red-800'      :
-                            submission.status === 'deferred'               ? 'bg-orange-100 text-orange-800':
-                            submission.status === 'returned'               ? 'bg-amber-100 text-amber-800'  :
-                            submission.status === 'queued'                 ? 'bg-yellow-100 text-yellow-800':
-                            submission.status === 'drafting'               ? 'bg-gray-100 text-gray-800'    :
-                            submission.status === 'analysing'              ? 'bg-blue-100 text-blue-800'    :
-                            submission.status === 'review_ready'           ? 'bg-blue-100 text-blue-700'    :
-                            submission.status === 'ea_reviewing'           ? 'bg-purple-100 text-purple-800':
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {submission.status.replace(/_/g, ' ')}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-sm text-gray-600">{submission.created_date}</td>
-                        <td className="py-3 px-4">
-                          <div className="flex gap-2">
-                            {!['analysing', 'submitted'].includes(submission.status) ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => navigate(`/earr/edit/${submission.id}`)}
-                              >
-                                Edit
-                              </Button>
-                            ) : null}
-                            {submission.status === 'queued' ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={startingReviewId === submission.id}
-                                onClick={() => handleMarkReadyForReview(submission.id)}
-                              >
-                                {startingReviewId === submission.id ? (
-                                  <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Starting…</>
-                                ) : 'Start Review'}
-                              </Button>
-                            ) : null}
-                            {['submitted', 'analysing'].includes(submission.status) ? (
-                              <Button variant="outline" size="sm" disabled>
-                                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                                Review in Progress
-                              </Button>
-                            ) : null}
-                            {['review_ready', 'ea_reviewing', 'approved', 'conditionally_approved', 'rejected', 'deferred', 'closed'].includes(submission.status) ? (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate(`/review-status/${submission.id}`)}
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                            ) : null}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {isEnterpriseArchitect && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Pending Reviews</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Project Name</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Review Ref</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Agent Recommendation</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reviews.map((review) => (
-                      <tr key={review.id} className="border-b hover:bg-gray-50">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-3">
-                            <CheckCircle className="w-4 h-4 text-gray-500" />
-                            <p className="font-medium">{review.project_name}</p>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4 text-sm font-mono text-gray-600">{toARBRef(review.submission_id, review.created_date)}</td>
-                        <td className="py-3 px-4">
-                          <span className="text-sm px-2 py-1 rounded bg-amber-100 text-amber-800">
-                            {review.agent_recommendation}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <Button
-                            onClick={() => navigate(`/review/${review.submission_id}`)}
-                            size="sm"
-                          >
-                            Review
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Modal for EARR */}
-      {isEarrModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-
-            {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 flex-shrink-0">
-              <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-                <ClipboardList className="w-5 h-5 text-indigo-500 flex-shrink-0" />
-                Enterprise Architecture Review Request (EARR)
-              </h3>
-              <button
-                onClick={() => setIsEarrModalOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex border-b border-slate-200 px-6 flex-shrink-0">
-              <button
-                onClick={() => setActiveEarrTab(1)}
-                className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px ${
-                  activeEarrTab === 1
-                    ? 'border-indigo-600 text-indigo-700'
-                    : 'border-transparent text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                <Briefcase className="w-4 h-4" />
-                Project Info
-              </button>
-              <button
-                onClick={() => setActiveEarrTab(2)}
-                className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px ${
-                  activeEarrTab === 2
-                    ? 'border-indigo-600 text-indigo-700'
-                    : 'border-transparent text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                <Layers className="w-4 h-4" />
-                Review Type + Domains
-              </button>
-            </div>
-
-            {/* Scrollable body */}
-            <div className="overflow-y-auto flex-1 px-6 py-5">
-
-              {/* Tab 1: Project Info */}
-              {activeEarrTab === 1 && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
-                      <Briefcase className="w-3.5 h-3.5 text-slate-400" />
-                      Project Name
-                      <span className="text-rose-500 ml-0.5">*</span>
-                    </label>
-                    <Input
-                      value={earrFormData.project_name}
-                      onChange={(e) => setEarrFormData({ ...earrFormData, project_name: e.target.value })}
-                      placeholder="Enter project name"
-                    />
-                  </div>
-                  <div>
-                    <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
-                      <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
-                      Problem Statement
-                      <span className="text-rose-500 ml-0.5">*</span>
-                    </label>
-                    <Textarea
-                      value={earrFormData.problem_statement}
-                      onChange={(e) => setEarrFormData({ ...earrFormData, problem_statement: e.target.value })}
-                      placeholder="Describe the problem this solution addresses"
-                      rows={4}
-                    />
-                  </div>
-                  <div>
-                    <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
-                      <Users className="w-3.5 h-3.5 text-slate-400" />
-                      Stakeholders
-                    </label>
-                    <Textarea
-                      value={earrFormData.stakeholders?.join('\n') || ''}
-                      onChange={(e) => setEarrFormData({ ...earrFormData, stakeholders: e.target.value.split('\n').filter(s => s.trim()) })}
-                      placeholder="List key stakeholders (one per line)"
-                      rows={4}
-                    />
-                  </div>
-                  <div>
-                    <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
-                      <TrendingUp className="w-3.5 h-3.5 text-slate-400" />
-                      Business Drivers
-                    </label>
-                    <Textarea
-                      value={earrFormData.business_drivers?.join('\n') || ''}
-                      onChange={(e) => setEarrFormData({ ...earrFormData, business_drivers: e.target.value.split('\n').filter(s => s.trim()) })}
-                      placeholder="List key business drivers (one per line)"
-                      rows={4}
-                    />
-                  </div>
-                  <div>
-                    <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
-                      <Target className="w-3.5 h-3.5 text-slate-400" />
-                      Target Business Outcomes
-                    </label>
-                    <Textarea
-                      value={earrFormData.target_business_outcomes}
-                      onChange={(e) => setEarrFormData({ ...earrFormData, target_business_outcomes: e.target.value })}
-                      placeholder="Describe target business outcomes and expected results"
-                      rows={3}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Tab 2: Review Type + Domains */}
-              {activeEarrTab === 2 && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
-                        <Tag className="w-3.5 h-3.5 text-slate-400" />
-                        PTX Gate
-                      </label>
-                      <select
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-                        value={earrPtxGate}
-                        onChange={(e) => setEarrPtxGate(e.target.value)}
-                      >
-                        <option value="">Select PTX Gate&hellip;</option>
-                        {ptxGates.map((gate) => (
-                          <option key={gate.value} value={gate.value}>{gate.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
-                        <Layers className="w-3.5 h-3.5 text-slate-400" />
-                        Architecture Disposition
-                      </label>
-                      <select
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-                        value={earrArchitectureDisposition}
-                        onChange={(e) => setEarrArchitectureDisposition(e.target.value)}
-                      >
-                        <option value="">Select Architecture Disposition&hellip;</option>
-                        {architectureDispositions.map((disp) => (
-                          <option key={disp.value} value={disp.value}>{disp.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-slate-200 pt-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700">
-                        <LayoutGrid className="w-3.5 h-3.5 text-slate-400" />
-                        Select Domains
-                        <span className="ml-1 text-xs font-normal text-slate-400">({selectedDomains.length} of {domains.length} selected)</span>
-                      </label>
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => setSelectedDomains(domains.map(d => d.slug))}
-                          className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
-                        >
-                          Select All
-                        </button>
-                        <span className="text-slate-300">|</span>
-                        <button
-                          onClick={() => setSelectedDomains([])}
-                          className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
-                        >
-                          Deselect All
-                        </button>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                      {domains.map((domain) => {
-                        const isSelected = selectedDomains.includes(domain.slug)
-                        return (
-                          <label
-                            key={domain.id}
-                            className={`flex items-center gap-3 p-3 border rounded-xl cursor-pointer transition-all ${
-                              isSelected
-                                ? 'border-indigo-400 bg-indigo-50/60 shadow-sm'
-                                : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedDomains([...selectedDomains, domain.slug])
-                                } else {
-                                  setSelectedDomains(selectedDomains.filter(slug => slug !== domain.slug))
-                                }
-                              }}
-                              className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 flex-shrink-0"
-                            />
-                            {domain.icon && (
-                              <span className="text-base leading-none flex-shrink-0">{domain.icon}</span>
-                            )}
-                            <span className={`text-sm font-medium leading-snug ${isSelected ? 'text-indigo-800' : 'text-slate-800'}`}>
-                              {domain.name}
-                            </span>
-                          </label>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Modal footer */}
-            <div className="flex justify-between items-center px-6 py-4 border-t border-slate-200 flex-shrink-0">
-              {activeEarrTab === 1 ? (
-                <button
-                  onClick={() => setIsEarrModalOpen(false)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-all"
-                >
-                  Cancel
-                </button>
-              ) : (
-                <button
-                  onClick={() => setActiveEarrTab(1)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-all"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Previous
-                </button>
-              )}
-
-              {activeEarrTab === 1 ? (
-                <button
-                  onClick={() => setActiveEarrTab(2)}
-                  disabled={!earrFormData.project_name || !earrFormData.problem_statement}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-                >
-                  Next
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    if (earrPtxGate && earrArchitectureDisposition) {
-                      setIsEarrModalOpen(false)
-                      navigate('/earr/new', {
-                        state: {
-                          ptxGate: earrPtxGate,
-                          architectureDisposition: earrArchitectureDisposition,
-                          projectInfo: earrFormData,
-                          selectedDomains: selectedDomains
-                        }
-                      })
-                    }
-                  }}
-                  disabled={!earrPtxGate || !earrArchitectureDisposition || selectedDomains.length === 0}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
-                >
-                  Create Request
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+      {loading ? (
+        <div className="text-center text-ink-400 py-12">Loading pipeline…</div>
+      ) : (
+        <SAKanban reviews={reviews} onOpen={onOpenReview} />
       )}
     </div>
+  )
+}
+
+// ── EA Triage row ─────────────────────────────────────────────────────────────
+
+function EATriageRow({ review, onOpen }: { review: Review; onOpen: () => void }) {
+  const { domains } = useMetadataStore()
+  const decision = decisionOf(review)
+  const ref = toARBRef(review.id, review.created_at)
+  // AI decision from report_json if present
+  const aiDecision = review.report_json?.ai_decision ?? review.decision
+  const aiDecisionMeta = aiDecision ? (DECISION_META[aiDecision] ?? decision) : decision
+
+  // NOTE: sla_hours and ai_confidence not in DB yet — shown as placeholder
+  const slaLabel = '—'
+  const slaColor = 'text-ink-400'
+
+  return (
+    <tr className="cursor-pointer hover:bg-paper transition-colors" onClick={onOpen}>
+      {/* SLA dot */}
+      <td className="px-3.5 py-3.5 w-9">
+        <span className="w-2 h-2 rounded-full bg-ink-300 inline-block" />
+      </td>
+
+      {/* Submission */}
+      <td className="px-3.5 py-3.5">
+        <div className="font-mono text-[12px] text-ink-400 tracking-[0.04em]">{ref}</div>
+        <div className="font-cond font-semibold text-[15.5px] text-ink-900 mt-0.5">
+          {review.solution_name}
+        </div>
+      </td>
+
+      {/* Submitter — not separately stored, use SA user placeholder */}
+      <td className="px-3.5 py-3.5">
+        <div className="text-[14px] text-ink-700">—</div>
+        <div className="text-[12.5px] text-ink-400">Submitted {timeAgo(review.submitted_at ?? review.created_at)}</div>
+      </td>
+
+      {/* AI recommendation */}
+      <td className="px-3.5 py-3.5" style={{ minWidth: 180 }}>
+        <Pill tone={aiDecisionMeta.tone} dot>{aiDecisionMeta.label}</Pill>
+        {/* NOTE: ai_confidence not in DB — add bar once field available */}
+      </td>
+
+      {/* Domains · findings — NOTE: counts need service join */}
+      <td className="px-3.5 py-3.5" style={{ minWidth: 160 }}>
+        <DomainStrip scores={{}} domains={domains} />
+        <div className="text-[12.5px] text-ink-500 mt-1.5">
+          {(review.report_json?.scope_tags ?? review.report_json?.form_data?.domains ?? []).length > 0
+            ? `${(review.report_json?.scope_tags ?? review.report_json?.form_data?.domains ?? []).length} domains in scope`
+            : 'domains TBD'}
+        </div>
+      </td>
+
+      {/* SLA — NOTE: not in DB yet */}
+      <td className="px-3.5 py-3.5">
+        <div className={`font-cond font-semibold text-[15px] tracking-[0.02em] ${slaColor}`}>{slaLabel}</div>
+        <div className="text-[12px] text-ink-400">Not configured</div>
+      </td>
+
+      {/* Open */}
+      <td className="px-3.5 py-3.5 w-[90px] text-right">
+        <button
+          onClick={e => { e.stopPropagation(); onOpen() }}
+          className="inline-flex items-center gap-1.5 h-[28px] px-2.5 rounded-[8px] border border-line bg-white text-[13px] text-ink-700 hover:bg-paper-2 transition-colors"
+        >
+          Open <ArrowRight className="w-3 h-3" />
+        </button>
+      </td>
+    </tr>
+  )
+}
+
+// ── EA Dashboard ──────────────────────────────────────────────────────────────
+
+type EAFilter = 'all' | 'sla' | 'low_conf' | 'rejects'
+
+function EADashboard({
+  reviews,
+  loading,
+  onOpenReview,
+}: {
+  reviews: Review[]
+  loading: boolean
+  onOpenReview: (r: Review) => void
+}) {
+  const [filter, setFilter] = useState<EAFilter>('all')
+
+  const pending = reviews.filter(r => ['review_ready', 'ea_reviewing'].includes(r.status))
+
+  const filtered = pending.filter(r => {
+    if (filter === 'rejects') return (r.decision ?? '').includes('reject')
+    // sla / low_conf require backend fields — show all for now
+    return true
+  })
+
+  const FILTERS: { k: EAFilter; label: string }[] = [
+    { k: 'all',      label: 'All' },
+    { k: 'sla',      label: 'SLA risk' },
+    { k: 'low_conf', label: 'AI low-conf' },
+    { k: 'rejects',  label: 'AI rejects' },
+  ]
+
+  return (
+    <div className="p-8">
+      {/* Page header */}
+      <div className="flex items-start mb-5">
+        <div>
+          <div className="font-cond font-semibold text-[12px] uppercase tracking-[0.16em] text-ink-400">
+            Enterprise Architect cockpit
+          </div>
+          <h1 className="font-cond font-bold text-ink-900 mt-1 mb-1" style={{ fontSize: 30, lineHeight: 1.05 }}>
+            Decisions desk
+          </h1>
+          <p className="text-[15px] text-ink-500">
+            {pending.length > 0
+              ? <><strong className="text-ink-700">{pending.length} review{pending.length !== 1 ? 's' : ''}</strong> awaiting your decision.</>
+              : 'No reviews awaiting your decision.'}
+          </p>
+        </div>
+        <div className="ml-auto flex gap-2.5">
+          <button className="inline-flex items-center gap-2 h-9 px-3.5 rounded-[8px] border border-line bg-white text-ink-700 text-[13px] font-medium hover:bg-paper-2 transition-colors">
+            <Filter className="w-3.5 h-3.5" /> Filters
+          </button>
+          <button className="inline-flex items-center gap-2 h-9 px-3.5 rounded-[8px] border border-line bg-white text-ink-700 text-[13px] font-medium hover:bg-paper-2 transition-colors">
+            <Download className="w-3.5 h-3.5" /> Export queue
+          </button>
+        </div>
+      </div>
+
+      <GovernanceStrip reviews={reviews} isSA={false} />
+
+      <div className="grid gap-[18px]" style={{ gridTemplateColumns: 'minmax(0, 1fr) 300px' }}>
+        {/* Triage queue */}
+        <div className="bg-white border border-line rounded-lg shadow-sh-sm overflow-hidden">
+          {/* Card head */}
+          <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-line-soft">
+            <h3 className="font-cond font-semibold text-[14.5px] uppercase tracking-[0.12em] text-ink-700">
+              Triage queue
+            </h3>
+            <div className="ml-auto flex gap-1.5">
+              {FILTERS.map(f => (
+                <button
+                  key={f.k}
+                  onClick={() => setFilter(f.k)}
+                  className={`inline-flex items-center h-[26px] px-2.5 rounded-[6px] text-[13px] font-medium border transition-colors
+                    ${filter === f.k
+                      ? 'bg-navy-700 text-white border-navy-700'
+                      : 'bg-transparent text-ink-600 border-transparent hover:bg-paper-2'
+                    }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="text-center text-ink-400 py-8">Loading…</div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center text-ink-400 py-10">
+              <CheckCircle className="w-8 h-8 mx-auto mb-2 opacity-30" />
+              Queue is clear.
+            </div>
+          ) : (
+            <table className="w-full border-collapse text-[14.5px]">
+              <thead>
+                <tr>
+                  <th className="text-left font-cond font-semibold text-[12px] uppercase tracking-[0.16em] text-ink-400 px-3.5 py-2.5 border-b border-line" />
+                  <th className="text-left font-cond font-semibold text-[12px] uppercase tracking-[0.16em] text-ink-400 px-3.5 py-2.5 border-b border-line">Submission</th>
+                  <th className="text-left font-cond font-semibold text-[12px] uppercase tracking-[0.16em] text-ink-400 px-3.5 py-2.5 border-b border-line">Submitter</th>
+                  <th className="text-left font-cond font-semibold text-[12px] uppercase tracking-[0.16em] text-ink-400 px-3.5 py-2.5 border-b border-line">AI recommendation</th>
+                  <th className="text-left font-cond font-semibold text-[12px] uppercase tracking-[0.16em] text-ink-400 px-3.5 py-2.5 border-b border-line">Domains · findings</th>
+                  <th className="text-left font-cond font-semibold text-[12px] uppercase tracking-[0.16em] text-ink-400 px-3.5 py-2.5 border-b border-line">SLA</th>
+                  <th className="border-b border-line" />
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(r => (
+                  <EATriageRow
+                    key={r.id}
+                    review={r}
+                    onOpen={() => onOpenReview(r)}
+                  />
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* Right sidebar */}
+        <div className="flex flex-col gap-4">
+          {/* Focus next */}
+          <div className="bg-white border border-line rounded-lg shadow-sh-sm overflow-hidden">
+            <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-line-soft">
+              <h3 className="font-cond font-semibold text-[15.5px] uppercase tracking-[0.12em] text-ink-700">
+                Focus next
+              </h3>
+            </div>
+            <div className="px-4 py-3 text-[14px]">
+              {pending.length === 0 ? (
+                <p className="text-ink-400 text-center py-4">Nothing in queue.</p>
+              ) : (
+                pending.slice(0, 2).map((r, i) => (
+                  <div
+                    key={r.id}
+                    onClick={() => onOpenReview(r)}
+                    className={`p-[10px] rounded-[8px] mb-2 cursor-pointer border ${
+                      i === 0
+                        ? 'bg-rag-red-100 border-rag-red-500/20'
+                        : 'bg-rag-amber-100 border-rag-amber-500/20'
+                    }`}
+                  >
+                    <div className={`flex items-center gap-1.5 font-semibold text-[13px] ${i === 0 ? 'text-rag-red-700' : 'text-rag-amber-700'}`}>
+                      {i === 0 ? <Clock className="w-3.5 h-3.5" /> : <Flag className="w-3.5 h-3.5" />}
+                      {i === 0 ? 'Oldest in queue' : 'Needs attention'}
+                    </div>
+                    <div className="mt-1 text-ink-900 font-medium text-[14px] leading-snug">{r.solution_name}</div>
+                    <div className="text-[12.5px] text-ink-500 mt-0.5">
+                      Submitted {timeAgo(r.submitted_at ?? r.created_at)}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Recent decisions */}
+          <div className="bg-white border border-line rounded-lg shadow-sh-sm overflow-hidden">
+            <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-line-soft">
+              <h3 className="font-cond font-semibold text-[15.5px] uppercase tracking-[0.12em] text-ink-700">
+                Recent decisions
+              </h3>
+              <span className="text-ink-400 text-[13px] ml-auto">last 30 days</span>
+            </div>
+            <div className="px-4 py-1">
+              {reviews
+                .filter(r => ['approved','conditionally_approved','rejected','deferred','closed','returned'].includes(r.status))
+                .slice(0, 4)
+                .map((r, i, arr) => {
+                  const d = decisionOf(r)
+                  const dotColor: Record<PillTone, string> = {
+                    green: 'bg-rag-green-500', teal: 'bg-teal-500',
+                    amber: 'bg-rag-amber-500', red: 'bg-rag-red-500',
+                    gold: 'bg-gold-500', navy: 'bg-navy-700', gray: 'bg-ink-300',
+                  }
+                  return (
+                    <div
+                      key={r.id}
+                      className="flex items-start gap-2.5 py-[9px]"
+                      style={{ borderBottom: i < arr.length - 1 ? '1px solid #E7EDF2' : 'none' }}
+                    >
+                      <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-[5px] ${dotColor[d.tone]}`} />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[14px] font-medium text-ink-900 truncate">{r.solution_name}</div>
+                        <div className="text-[12.5px] text-ink-500">{d.label}</div>
+                      </div>
+                      <div className="text-[12px] text-ink-400">{timeAgo(r.submitted_at ?? r.created_at)}</div>
+                    </div>
+                  )
+                })}
+              {reviews.filter(r => ['approved','conditionally_approved','rejected','deferred','closed','returned'].includes(r.status)).length === 0 && (
+                <p className="text-ink-400 text-center py-4 text-[14px]">No decisions yet.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Dashboard (role-aware) ────────────────────────────────────────────────────
+
+export default function Dashboard() {
+  const navigate = useNavigate()
+  const user     = useAuthStore(s => s.user)
+  const { loadMetadata } = useMetadataStore()
+  useEffect(() => { loadMetadata() }, [])
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const isSA = user?.role === 'solution_architect'
+  const isEA = user?.role === 'enterprise_architect' || user?.role === 'arb_admin' || user?.role === 'super_admin'
+
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        if (isSA) {
+          const data = await reviewService.getUserReviews()
+          setReviews(data as Review[])
+        } else if (isEA) {
+          const data = await reviewService.getAllReviews()
+          setReviews(data as Review[])
+        }
+      } catch (err) {
+        console.error('Dashboard fetch error:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetch()
+  }, [isSA, isEA])
+
+  const firstName = (user?.name ?? 'there').split(' ')[0]
+
+  const openReview = (r: Review) => {
+    // Drafting is the only state where the edit wizard makes sense.
+    // Everything else — including queued/analysing/submitted (stuck or in-flight) — goes
+    // to the ReviewDashboard so the SA sees the retry banner rather than a blank form.
+    if (r.status === 'drafting') {
+      navigate(`/earr/edit/${r.id}`)
+    } else {
+      navigate(`/review/${r.id}`)
+    }
+  }
+
+  if (isSA) {
+    return (
+      <SADashboard
+        reviews={reviews}
+        firstName={firstName}
+        loading={loading}
+        onOpenReview={openReview}
+        onNew={() => navigate('/submission/new')}
+      />
+    )
+  }
+
+  if (isEA) {
+    return (
+      <EADashboard
+        reviews={reviews}
+        loading={loading}
+        onOpenReview={openReview}
+      />
+    )
+  }
+
+  return (
+    <div className="p-8 text-ink-500">Loading your dashboard…</div>
   )
 }

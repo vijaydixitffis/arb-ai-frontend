@@ -88,12 +88,13 @@ export const reviewService = {
    * Mark review as ready for review and trigger backend
    */
   async markReadyForReview(reviewId: string): Promise<void> {
-    console.log('[FRONTEND] Marking review as ready for review:', reviewId)
     await apiRequest(`/reviews/${reviewId}`, {
       method: 'PUT',
-      body: JSON.stringify({ status: 'submitted' })
+      body: JSON.stringify({
+        status: 'submitted',               // backend _STATUS_MAP maps this → 'queued'
+        submitted_at: new Date().toISOString(),
+      })
     })
-    console.log('[FRONTEND] Review status updated to submitted')
   },
 
   /**
@@ -162,14 +163,17 @@ export const reviewService = {
   },
 
   /**
-   * Trigger the review orchestrator via Python backend
+   * Trigger the review orchestrator via Python backend.
+   * Pass retryDomains to re-run only specific failed domains.
    */
-  async triggerReviewOrchestrator(reviewId: string): Promise<ReviewResult> {
-    console.log('[FRONTEND] Triggering review orchestrator for reviewId:', reviewId)
+  async triggerReviewOrchestrator(reviewId: string, retryDomains?: string[]): Promise<ReviewResult> {
+    console.log('[FRONTEND] Triggering review orchestrator for reviewId:', reviewId, retryDomains ? `retryDomains: ${retryDomains}` : '')
     try {
+      const body: Record<string, unknown> = { reviewId }
+      if (retryDomains && retryDomains.length > 0) body.retryDomains = retryDomains
       const result = await apiRequest('/agent/review', {
         method: 'POST',
-        body: JSON.stringify({ reviewId })
+        body: JSON.stringify(body)
       })
       console.log('[FRONTEND] Review orchestrator triggered successfully:', result)
       return result
@@ -291,19 +295,10 @@ export const reviewService = {
    */
   extractScopeTags(formData: any, artefacts?: Record<string, any[]>): string[] {
     const tags: Set<string> = new Set()
-    const VALID_DOMAINS = [
-      'solution', 'business', 'application', 'integration',
-      'data', 'infrastructure', 'devsecops', 'nfr'
-    ]
 
     // Check for dynamic domain_data structure - add domains with checklist data (new format)
     if (formData.domain_data) {
       Object.keys(formData.domain_data).forEach(domain => {
-        // Validate domain name
-        if (!VALID_DOMAINS.includes(domain)) {
-          console.warn(`Invalid domain '${domain}' found in domain_data, skipping`)
-          return
-        }
 
         const domainInfo = formData.domain_data[domain]
         const hasChecklist = domainInfo?.checklist && 
@@ -325,12 +320,6 @@ export const reviewService = {
     Object.keys(formData).forEach(key => {
       if (key.endsWith('_checklist') || key.endsWith('_evidence')) {
         const domain = key.replace(/_(checklist|evidence)$/, '')
-        
-        // Validate domain name
-        if (!VALID_DOMAINS.includes(domain)) {
-          console.warn(`Invalid domain '${domain}' found in legacy format, skipping`)
-          return
-        }
 
         const data = formData[key]
         if (data && Object.keys(data).length > 0) {
@@ -353,11 +342,6 @@ export const reviewService = {
     // Add domains from artefacts - if artefacts exist for a domain, include it
     if (artefacts) {
       Object.entries(artefacts).forEach(([domain, domainArtefacts]) => {
-        // Validate domain name
-        if (!VALID_DOMAINS.includes(domain)) {
-          console.warn(`Invalid domain '${domain}' found in artefacts, skipping`)
-          return
-        }
 
         if (domainArtefacts && domainArtefacts.length > 0) {
           // Only count domains with successfully uploaded artefacts (have IDs or file data)
@@ -409,5 +393,32 @@ export const reviewService = {
 
   async deleteArtefact(artefactId: string, _reviewId?: string) {
     return artefactService.deleteArtefact(artefactId)
-  }
+  },
+
+  async getEAOverrides(reviewId: string) {
+    return await apiRequest(`/reviews/${reviewId}/overrides`)
+  },
+
+  async saveEAOverride(reviewId: string, override: {
+    override_type: string; target_id: string; original_value: any; override_value: any; rationale: string
+  }) {
+    return await apiRequest(`/reviews/${reviewId}/overrides`, {
+      method: 'POST',
+      body: JSON.stringify(override)
+    })
+  },
+
+  async openForEA(reviewId: string) {
+    return await apiRequest(`/reviews/${reviewId}/open`, { method: 'POST' })
+  },
+
+  async submitEADecision(reviewId: string, payload: {
+    ea_decision: string; ea_annotations?: string | null; ea_name: string
+    return_domains?: string[]; rework_gaps?: string[]; decision_rationale?: string
+  }) {
+    return await apiRequest(`/reviews/${reviewId}/ea-decision`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+  },
 }

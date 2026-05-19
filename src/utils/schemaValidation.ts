@@ -30,10 +30,6 @@ interface FormData {
   }>
 }
 
-const VALID_DOMAINS = [
-  'solution', 'business', 'application', 'integration',
-  'data', 'infrastructure', 'devsecops', 'nfr'
-]
 
 const VALID_COMPLIANCE_ANSWERS = [
   'compliant', 'non_compliant', 'partial', 'na'
@@ -83,19 +79,12 @@ export function validateARBFormData(formData: FormData): ValidationResult {
 
   // Scope tags validation
   if (formData.scope_tags && formData.scope_tags.length > 0) {
-    const invalidTags = formData.scope_tags.filter(tag => !VALID_DOMAINS.includes(tag))
-    if (invalidTags.length > 0) {
-      warnings.push(`Invalid scope tags detected: ${invalidTags.join(', ')}`)
-    }
+    // scope_tags are validated server-side against the domains table
   }
 
   // Domain data validation
   if (formData.domain_data) {
     Object.entries(formData.domain_data).forEach(([domain, data]) => {
-      if (!VALID_DOMAINS.includes(domain)) {
-        warnings.push(`Unknown domain '${domain}' found in domain_data`)
-      }
-
       // Validate checklist answers
       if (data.checklist) {
         Object.entries(data.checklist).forEach(([questionCode, answer]) => {

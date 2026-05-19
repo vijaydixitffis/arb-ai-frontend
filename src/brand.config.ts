@@ -12,9 +12,12 @@ export const brand = {
   shortName:   import.meta.env.VITE_BRAND_SHORT_NAME  ?? 'ARB',
   tagline:     import.meta.env.VITE_BRAND_TAGLINE      ?? 'Architecture Review Board',
   description: import.meta.env.VITE_BRAND_DESCRIPTION ?? 'Intelligent Architecture Governance',
+  company:     import.meta.env.VITE_BRAND_COMPANY      ?? '',
 
-  // Visual
-  logoUrl:      import.meta.env.VITE_BRAND_LOGO        ?? '/logo-default.svg',
+  // Visual — prepend BASE_URL so paths work under any Vite base (e.g. /arb-ai-agent/)
+  logoUrl:      import.meta.env.VITE_BRAND_LOGO
+                  ? `${import.meta.env.BASE_URL}${(import.meta.env.VITE_BRAND_LOGO as string).replace(/^\//, '')}`
+                  : null,
   primaryColor: import.meta.env.VITE_BRAND_COLOR       ?? '#0d9488', // teal-600
   footerText:   import.meta.env.VITE_BRAND_FOOTER      ?? '© 2026 ARB AI Agent',
 
