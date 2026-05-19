@@ -630,7 +630,7 @@ export default function Dashboard() {
     const fetch = async () => {
       try {
         if (isSA) {
-          const data = await reviewService.getUserReviews()
+          const data = await reviewService.getUserReviews(user?.id)
           setReviews(data as Review[])
         } else if (isEA) {
           const data = await reviewService.getAllReviews()

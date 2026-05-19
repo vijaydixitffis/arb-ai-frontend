@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAuthStore, initializeSession } from './stores/authStore'
 import { isAdmin, isSuperAdmin } from './types/admin'
+import { ApiErrorBoundary } from './components/ui/ApiErrorBoundary'
 import LoginPage from './pages/LoginPage'
 import Dashboard from './pages/Dashboard'
 import SubmissionWizard from './pages/SubmissionWizard'
@@ -17,6 +19,15 @@ import Analytics from './pages/Admin/Analytics'
 import AuditLog from './pages/Admin/AuditLog'
 import PromptManagement from './pages/Admin/PromptManagement'
 import KnowledgeBase from './pages/Admin/KnowledgeBase'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 30_000,
+    },
+  },
+})
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isInitializing } = useAuthStore()
@@ -96,56 +107,70 @@ function App() {
   }, [user])
 
   return (
-    <BrowserRouter basename="/arb-ai-agent">
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={
-          <ProtectedRoute>
-            <Layout />
-          </ProtectedRoute>
-        }>
-          <Route index element={<RootRedirect />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="submissions" element={<Dashboard />} />
-          <Route path="reviews" element={<Dashboard />} />
-          <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1><p className="text-gray-600 mt-2">Settings page coming soon</p></div>} />
-          <Route path="submission/new" element={
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '') || '/'}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={
             <ProtectedRoute>
-              <SubmissionWizard />
+              <Layout />
             </ProtectedRoute>
-          } />
-          <Route path="earr/new" element={
-            <ProtectedRoute>
-              <SubmissionWizard />
-            </ProtectedRoute>
-          } />
-          <Route path="earr/edit/:reviewId" element={
-            <ProtectedRoute>
-              <SubmissionWizard />
-            </ProtectedRoute>
-          } />
-          <Route path="review/:submissionId" element={
-            <ProtectedRoute>
-              <ReviewDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="review-status/:reviewId" element={<ReviewStatus />} />
+          }>
+            <Route index element={<RootRedirect />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="submissions" element={<Dashboard />} />
+            <Route path="reviews" element={<Dashboard />} />
+            <Route path="settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings</h1><p className="text-gray-600 mt-2">Settings page coming soon</p></div>} />
+            <Route path="submission/new" element={
+              <ProtectedRoute>
+                <ApiErrorBoundary fallbackLabel="Retry submission">
+                  <SubmissionWizard />
+                </ApiErrorBoundary>
+              </ProtectedRoute>
+            } />
+            <Route path="earr/new" element={
+              <ProtectedRoute>
+                <ApiErrorBoundary fallbackLabel="Retry submission">
+                  <SubmissionWizard />
+                </ApiErrorBoundary>
+              </ProtectedRoute>
+            } />
+            <Route path="earr/edit/:reviewId" element={
+              <ProtectedRoute>
+                <ApiErrorBoundary fallbackLabel="Retry submission">
+                  <SubmissionWizard />
+                </ApiErrorBoundary>
+              </ProtectedRoute>
+            } />
+            <Route path="review/:submissionId" element={
+              <ProtectedRoute>
+                <ApiErrorBoundary fallbackLabel="Reload review">
+                  <ReviewDashboard />
+                </ApiErrorBoundary>
+              </ProtectedRoute>
+            } />
+            <Route path="review-status/:reviewId" element={
+              <ApiErrorBoundary fallbackLabel="Reload status">
+                <ReviewStatus />
+              </ApiErrorBoundary>
+            } />
 
-          {/* Admin routes — arb_admin + super_admin */}
-          <Route path="admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          <Route path="admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
-          <Route path="admin/config" element={<SuperAdminRoute><ConfigSettings /></SuperAdminRoute>} />
-          <Route path="admin/domains" element={<AdminRoute><DomainManagement /></AdminRoute>} />
-          <Route path="admin/checklist" element={<AdminRoute><ChecklistEditor /></AdminRoute>} />
-          <Route path="admin/analytics" element={<AdminRoute><Analytics /></AdminRoute>} />
-          <Route path="admin/audit-log" element={<AdminRoute><AuditLog /></AdminRoute>} />
+            {/* Admin routes — arb_admin + super_admin */}
+            <Route path="admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+            <Route path="admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} />
+            <Route path="admin/config" element={<SuperAdminRoute><ConfigSettings /></SuperAdminRoute>} />
+            <Route path="admin/domains" element={<AdminRoute><DomainManagement /></AdminRoute>} />
+            <Route path="admin/checklist" element={<AdminRoute><ChecklistEditor /></AdminRoute>} />
+            <Route path="admin/analytics" element={<AdminRoute><Analytics /></AdminRoute>} />
+            <Route path="admin/audit-log" element={<AdminRoute><AuditLog /></AdminRoute>} />
 
-          {/* Super-admin only routes */}
-          <Route path="admin/prompts" element={<SuperAdminRoute><PromptManagement /></SuperAdminRoute>} />
-          <Route path="admin/kb" element={<SuperAdminRoute><KnowledgeBase /></SuperAdminRoute>} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+            {/* Super-admin only routes */}
+            <Route path="admin/prompts" element={<SuperAdminRoute><PromptManagement /></SuperAdminRoute>} />
+            <Route path="admin/kb" element={<SuperAdminRoute><KnowledgeBase /></SuperAdminRoute>} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   )
 }
 
