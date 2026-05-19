@@ -4,7 +4,7 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/arb-ai-agent/',
+  base: process.env.VITE_BASE_PATH ?? '/arb-ai-frontend/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
