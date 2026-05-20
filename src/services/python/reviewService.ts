@@ -24,6 +24,9 @@ export interface ReviewResult {
   reviewId: string
   report: any
   decision: string
+  tokensUsed?: number
+  hasDomainErrors?: boolean
+  failedDomains?: string[]
 }
 
 export interface ReviewStatus {

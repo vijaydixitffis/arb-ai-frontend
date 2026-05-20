@@ -200,10 +200,13 @@ export default function ReviewStatus() {
 
   const activeStep     = reviewStatus ? getActiveStep(reviewStatus.status) : -1
   const isAIProcessing = reviewStatus && ['analysing','in_review','submitted'].includes(reviewStatus.status)
-  const hasDomainErrors = reviewStatus?.report_json?.has_domain_errors === true
   const failedDomains: string[] = reviewStatus?.report_json?.failed_domains ?? []
+  // has_domain_errors is persisted by the backend; fall back to failed_domains for older records.
+  const hasDomainErrors = reviewStatus?.report_json?.has_domain_errors === true || failedDomains.length > 0
   const showRetrigger  = reviewStatus &&
-    (reviewStatus.status === 'agent_failed' || (reviewStatus.status === 'review_ready' && hasDomainErrors))
+    (reviewStatus.status === 'agent_failed' ||
+     reviewStatus.status === 'review_pending' ||
+     (reviewStatus.status === 'review_ready' && hasDomainErrors))
 
   if (loading && !reviewStatus) {
     return (
