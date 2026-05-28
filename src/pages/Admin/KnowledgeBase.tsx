@@ -61,8 +61,8 @@ function IngestModal({ domains, onClose, onSaved }: IngestModalProps) {
         {/* Header */}
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-teal-50 border border-teal-100 rounded-lg flex items-center justify-center">
-              <Upload className="w-4 h-4 text-teal-600" />
+            <div className="w-8 h-8 bg-turquoise-50 border border-turquoise-100 rounded-lg flex items-center justify-center">
+              <Upload className="w-4 h-4 text-turquoise-600" />
             </div>
             <div>
               <h2 className="text-base font-semibold text-slate-900">Ingest Knowledge Base Content</h2>
@@ -80,7 +80,7 @@ function IngestModal({ domains, onClose, onSaved }: IngestModalProps) {
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Title <span className="text-red-500">*</span></label>
             <input value={title} onChange={e => setTitle(e.target.value)}
               placeholder="e.g. Zero Trust Network Access Policy"
-              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
           </div>
 
           {/* Domain + Markers row */}
@@ -88,7 +88,7 @@ function IngestModal({ domains, onClose, onSaved }: IngestModalProps) {
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Domain</label>
               <select value={domainSlug} onChange={e => setDomainSlug(e.target.value)}
-                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-turquoise-500">
                 <option value="">— No domain —</option>
                 {domains.filter(d => d.is_active).map(d => (
                   <option key={d.id} value={d.slug}>{d.name}</option>
@@ -99,7 +99,7 @@ function IngestModal({ domains, onClose, onSaved }: IngestModalProps) {
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Markers / Principle IDs</label>
               <input value={markers} onChange={e => setMarkers(e.target.value)}
                 placeholder="e.g. SEC-01, AUTH-02, zero-trust"
-                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
               <p className="text-xs text-slate-400 mt-1">Comma-separated tags for retrieval</p>
             </div>
           </div>
@@ -110,12 +110,12 @@ function IngestModal({ domains, onClose, onSaved }: IngestModalProps) {
             <div className="flex gap-1 mb-3 bg-slate-100 rounded-lg p-1 w-fit">
               <button
                 onClick={() => setTab('file')}
-                className={`flex items-center gap-1.5 px-3 h-7 rounded-md text-xs font-medium transition-colors ${tab === 'file' ? 'bg-white text-teal-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                className={`flex items-center gap-1.5 px-3 h-7 rounded-md text-xs font-medium transition-colors ${tab === 'file' ? 'bg-white text-turquoise-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
                 <FileUp className="w-3.5 h-3.5" /> Upload File
               </button>
               <button
                 onClick={() => setTab('paste')}
-                className={`flex items-center gap-1.5 px-3 h-7 rounded-md text-xs font-medium transition-colors ${tab === 'paste' ? 'bg-white text-teal-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                className={`flex items-center gap-1.5 px-3 h-7 rounded-md text-xs font-medium transition-colors ${tab === 'paste' ? 'bg-white text-turquoise-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
                 <ClipboardType className="w-3.5 h-3.5" /> Paste Text
               </button>
             </div>
@@ -124,10 +124,10 @@ function IngestModal({ domains, onClose, onSaved }: IngestModalProps) {
               <div>
                 <div
                   onClick={() => fileRef.current?.click()}
-                  className="border-2 border-dashed border-slate-200 hover:border-teal-400 rounded-xl p-6 text-center cursor-pointer transition-colors group">
-                  <FileUp className="w-7 h-7 mx-auto mb-2 text-slate-300 group-hover:text-teal-500 transition-colors" />
+                  className="border-2 border-dashed border-slate-200 hover:border-turquoise-400 rounded-xl p-6 text-center cursor-pointer transition-colors group">
+                  <FileUp className="w-7 h-7 mx-auto mb-2 text-slate-300 group-hover:text-turquoise-500 transition-colors" />
                   {fileName
-                    ? <p className="text-sm font-medium text-teal-700">{fileName}</p>
+                    ? <p className="text-sm font-medium text-turquoise-700">{fileName}</p>
                     : <p className="text-sm text-slate-400">Click to choose a <span className="font-medium">.txt</span> or <span className="font-medium">.md</span> file</p>
                   }
                   {content && <p className="text-xs text-slate-400 mt-1">{content.length.toLocaleString()} characters loaded</p>}
@@ -145,7 +145,7 @@ function IngestModal({ domains, onClose, onSaved }: IngestModalProps) {
                 value={content} onChange={e => setContent(e.target.value)}
                 rows={10} spellCheck={false}
                 placeholder="Paste your knowledge base content here (Markdown supported)…"
-                className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-xs font-mono text-slate-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-teal-500 resize-y" />
+                className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-xs font-mono text-slate-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-turquoise-500 resize-y" />
             )}
           </div>
 
@@ -158,7 +158,7 @@ function IngestModal({ domains, onClose, onSaved }: IngestModalProps) {
             Cancel
           </button>
           <button onClick={handleSubmit} disabled={saving}
-            className="flex-1 h-10 bg-teal-600 text-white rounded-lg text-sm font-semibold hover:bg-teal-700 disabled:opacity-50 flex items-center justify-center gap-2">
+            className="flex-1 h-10 bg-turquoise-600 text-white rounded-lg text-sm font-semibold hover:bg-turquoise-700 disabled:opacity-50 flex items-center justify-center gap-2">
             <Upload className="w-4 h-4" />
             {saving ? 'Ingesting…' : 'Ingest Content'}
           </button>
@@ -216,18 +216,18 @@ function EntryDrawer({ entry, onClose, onSave }: EntryDrawerProps) {
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Title</label>
             <input value={title} onChange={e => setTitle(e.target.value)}
-              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Category</label>
               <input value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. security, data"
-                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Principle ID</label>
               <input value={principleId} onChange={e => setPrincipleId(e.target.value)} placeholder="e.g. SEC-01"
-                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
             </div>
           </div>
           <div>
@@ -235,14 +235,14 @@ function EntryDrawer({ entry, onClose, onSave }: EntryDrawerProps) {
             <textarea value={content} onChange={e => setContent(e.target.value)} rows={20}
               spellCheck={false}
               placeholder="Markdown content…"
-              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-xs font-mono text-slate-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-teal-500 resize-y" />
+              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-xs font-mono text-slate-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-turquoise-500 resize-y" />
           </div>
           {err && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{err}</p>}
         </div>
         <div className="px-6 py-4 border-t border-slate-100 flex gap-3">
           <button onClick={onClose} className="flex-1 h-10 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50">Cancel</button>
           <button onClick={handleSave} disabled={saving}
-            className="flex-1 h-10 bg-teal-600 text-white rounded-lg text-sm font-semibold hover:bg-teal-700 disabled:opacity-50">
+            className="flex-1 h-10 bg-turquoise-600 text-white rounded-lg text-sm font-semibold hover:bg-turquoise-700 disabled:opacity-50">
             {saving ? 'Saving…' : 'Save'}
           </button>
         </div>
@@ -296,12 +296,12 @@ function CategoryGroup({ category, entries, onEdit, onToggle, onDelete, toggling
                   className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-40"
                 >
                   {entry.is_active
-                    ? <ToggleRight className="w-4 h-4 text-teal-600" />
+                    ? <ToggleRight className="w-4 h-4 text-turquoise-600" />
                     : <ToggleLeft className="w-4 h-4 text-slate-400" />
                   }
                 </button>
                 <button onClick={() => onEdit(entry)}
-                  className="p-1.5 hover:bg-teal-50 rounded-lg text-slate-400 hover:text-teal-600 transition-colors">
+                  className="p-1.5 hover:bg-turquoise-50 rounded-lg text-slate-400 hover:text-turquoise-600 transition-colors">
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
                 <button onClick={() => onDelete(entry)} disabled={deleting === entry.id}
@@ -383,7 +383,7 @@ export default function KnowledgeBase() {
     <div className="p-8 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-teal-600 rounded-lg flex items-center justify-center">
+          <div className="w-9 h-9 bg-turquoise-600 rounded-lg flex items-center justify-center">
             <BookOpen className="w-5 h-5 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Knowledge Base</h1>
@@ -395,7 +395,7 @@ export default function KnowledgeBase() {
             Refresh
           </button>
           <button onClick={() => setShowIngest(true)}
-            className="flex items-center gap-2 px-4 h-9 border border-teal-300 text-teal-700 bg-teal-50 rounded-lg text-sm font-semibold hover:bg-teal-100">
+            className="flex items-center gap-2 px-4 h-9 border border-turquoise-300 text-turquoise-700 bg-turquoise-50 rounded-lg text-sm font-semibold hover:bg-turquoise-100">
             <Upload className="w-4 h-4" /> Ingest Content
           </button>
         </div>
@@ -408,18 +408,18 @@ export default function KnowledgeBase() {
         <input
           value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Search by title, category, or principle ID…"
-          className="h-9 px-3 border border-slate-200 rounded-lg text-sm w-80 focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="h-9 px-3 border border-slate-200 rounded-lg text-sm w-80 focus:outline-none focus:ring-2 focus:ring-turquoise-500"
         />
         <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
           <input type="checkbox" checked={showInactive} onChange={e => setShowInactive(e.target.checked)}
-            className="accent-teal-600" />
+            className="accent-turquoise-600" />
           Show inactive
         </label>
       </div>
 
       {loading ? (
         <div className="flex items-center gap-2 text-slate-400 py-8">
-          <div className="w-4 h-4 border-2 border-slate-200 border-t-teal-500 rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-slate-200 border-t-turquoise-500 rounded-full animate-spin" />
           Loading knowledge base…
         </div>
       ) : Object.keys(grouped).length === 0 ? (

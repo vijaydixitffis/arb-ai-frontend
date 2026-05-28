@@ -44,14 +44,14 @@ function RailItem({ item, active }: { item: NavItem; active: boolean }) {
       onClick={() => navigate(item.path)}
       className={`w-full flex items-center gap-3 px-[10px] py-[9px] rounded-[8px] text-[15px] border-none bg-transparent text-left transition-colors duration-150 cursor-pointer
         ${active
-          ? 'bg-teal-500/[0.14] text-white font-medium shadow-[inset_2px_0_0_#00B09C]'
+          ? 'bg-turquoise-500/[0.14] text-white font-medium shadow-[inset_2px_0_0_#1FBCD4]'
           : 'text-white/[0.72] hover:bg-white/5 hover:text-white'
         }`}
     >
       <Icon className="w-4 h-4 flex-shrink-0 opacity-85" />
       <span className="flex-1 min-w-0 truncate">{item.label}</span>
       {item.badge && (
-        <span className="font-cond font-semibold text-[12px] bg-gold-500 text-navy-900 px-[7px] py-[1px] rounded-full leading-none">
+        <span className="font-cond font-semibold text-[12px] bg-turquoise-500 text-navy-900 px-[7px] py-[1px] rounded-full leading-none">
           {item.badge}
         </span>
       )}
@@ -141,26 +141,26 @@ export default function NavRail() {
   return (
     <aside
       className="flex flex-col h-screen flex-shrink-0 sticky top-0"
-      style={{ width: 240, background: '#1A2D45', color: 'rgba(255,255,255,0.78)' }}
+      style={{ width: 240, background: '#1E4A82', color: 'rgba(255,255,255,0.78)' }}
     >
       {/* Brand block */}
       <div className="flex items-center gap-3 px-5 py-[22px] border-b border-white/[0.06]">
         <div
           className="w-9 h-9 rounded-[8px] grid place-items-center flex-shrink-0"
           style={{
-            background: '#00B09C',
+            background: '#1FBCD4',
             boxShadow: 'inset 0 -3px 0 rgba(0,0,0,0.15)',
           }}
         >
           {/* FFIS shield mark */}
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B1B2E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14366B" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
             <path d="M9 12l2 2 4-4" />
           </svg>
         </div>
         <div>
           <div className="font-cond font-bold text-[20px] text-white leading-[1.05] tracking-[0.02em]">
-            ARB <span style={{ color: '#00B09C' }}>AI</span> Agent
+            ARB <span style={{ color: '#1FBCD4' }}>AI</span> Agent
           </div>
           <div className="font-cond text-[11px] uppercase tracking-[0.22em] text-white/[0.45] mt-[2px]">
             {brand.company}
@@ -187,13 +187,13 @@ export default function NavRail() {
       <div className="flex items-center gap-[10px] px-[14px] py-[14px] border-t border-white/[0.07]" style={{ paddingBottom: 18 }}>
         <div
           className="w-[34px] h-[34px] rounded-full grid place-items-center flex-shrink-0 font-cond font-bold text-[13px] text-navy-900"
-          style={{ background: 'linear-gradient(135deg, #00B09C, #D98A00)' }}
+          style={{ background: 'linear-gradient(135deg, #1FBCD4, #1E4A82)' }}
         >
           {initials(name)}
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-[14.5px] font-medium text-white truncate">{name}</div>
-          <div className="font-cond text-[12px] uppercase tracking-[0.14em] text-teal-500 leading-tight">
+          <div className="font-cond text-[12px] uppercase tracking-[0.14em] text-turquoise-500 leading-tight">
             {displayRole}
           </div>
         </div>

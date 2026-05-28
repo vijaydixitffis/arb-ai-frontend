@@ -55,7 +55,7 @@ function ConfigField({ item, onSave }: ConfigFieldProps) {
         <label className="flex items-center gap-3 cursor-pointer">
           <div
             onClick={() => handleChange(!localValue)}
-            className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${localValue ? 'bg-teal-500' : 'bg-slate-200'}`}
+            className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer ${localValue ? 'bg-turquoise-500' : 'bg-slate-200'}`}
           >
             <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${localValue ? 'translate-x-5' : 'translate-x-0.5'}`} />
           </div>
@@ -70,7 +70,7 @@ function ConfigField({ item, onSave }: ConfigFieldProps) {
           value={localValue}
           step="any"
           onChange={e => handleChange(parseFloat(e.target.value) || 0)}
-          className="w-40 h-9 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="w-40 h-9 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500"
         />
       )
     }
@@ -80,7 +80,7 @@ function ConfigField({ item, onSave }: ConfigFieldProps) {
         : [localValue]
       return (
         <select value={localValue} onChange={e => handleChange(e.target.value)}
-          className="w-48 h-9 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+          className="w-48 h-9 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500 bg-white">
           {options.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
       )
@@ -90,7 +90,7 @@ function ConfigField({ item, onSave }: ConfigFieldProps) {
         type="text"
         value={typeof localValue === 'string' ? localValue : JSON.stringify(localValue)}
         onChange={e => handleChange(e.target.value)}
-        className="w-72 h-9 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+        className="w-72 h-9 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500"
       />
     )
   }
@@ -111,10 +111,10 @@ function ConfigField({ item, onSave }: ConfigFieldProps) {
                 value={reason}
                 onChange={e => setReason(e.target.value)}
                 placeholder="Reason (optional)"
-                className="w-36 h-9 px-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-36 h-9 px-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-turquoise-500"
               />
               <button onClick={handleSave} disabled={saving}
-                className="flex items-center gap-1 px-3 h-9 bg-teal-600 text-white rounded-lg text-xs font-semibold hover:bg-teal-700 disabled:opacity-50">
+                className="flex items-center gap-1 px-3 h-9 bg-turquoise-600 text-white rounded-lg text-xs font-semibold hover:bg-turquoise-700 disabled:opacity-50">
                 <Save className="w-3 h-3" />
                 {saving ? '…' : 'Save'}
               </button>
@@ -143,7 +143,7 @@ export default function ConfigSettings() {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <div className="flex items-center gap-3 mb-2">
-        <div className="w-9 h-9 bg-teal-600 rounded-lg flex items-center justify-center">
+        <div className="w-9 h-9 bg-turquoise-600 rounded-lg flex items-center justify-center">
           <Settings className="w-5 h-5 text-white" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900">System Configuration</h1>
@@ -154,7 +154,7 @@ export default function ConfigSettings() {
 
       {configLoading ? (
         <div className="flex items-center gap-2 text-slate-400 py-8">
-          <div className="w-4 h-4 border-2 border-slate-200 border-t-teal-500 rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-slate-200 border-t-turquoise-500 rounded-full animate-spin" />
           Loading config…
         </div>
       ) : (
@@ -167,7 +167,7 @@ export default function ConfigSettings() {
                 onClick={() => setActiveTab(cat)}
                 className={`px-4 py-2.5 text-sm font-medium rounded-t-lg -mb-px transition-colors ${
                   activeTab === cat
-                    ? 'border border-b-white border-slate-200 bg-white text-teal-700'
+                    ? 'border border-b-white border-slate-200 bg-white text-turquoise-700'
                     : 'text-slate-500 hover:text-slate-700'
                 }`}
               >

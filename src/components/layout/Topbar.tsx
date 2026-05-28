@@ -66,7 +66,7 @@ export default function Topbar() {
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder="Search submissions, ADRs, findings…"
-          className="w-full h-[34px] rounded-[8px] border border-line bg-paper text-[14px] text-ink-700 outline-none pl-8 pr-3 focus:border-teal-500 focus:bg-white transition-colors"
+          className="w-full h-[34px] rounded-[8px] border border-line bg-paper text-[14px] text-ink-700 outline-none pl-8 pr-3 focus:border-turquoise-500 focus:bg-white transition-colors"
           style={{ fontFamily: 'inherit' }}
         />
       </div>
@@ -86,7 +86,7 @@ export default function Topbar() {
         <Bell style={{ width: 16, height: 16 }} />
         {/* Unread indicator — static for now, wire to notification service when ready */}
         <span
-          className="absolute top-[6px] right-[6px] w-[7px] h-[7px] rounded-full bg-gold-500"
+          className="absolute top-[6px] right-[6px] w-[7px] h-[7px] rounded-full bg-turquoise-500"
           style={{ border: '1.5px solid #fff' }}
         />
       </button>

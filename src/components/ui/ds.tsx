@@ -58,26 +58,24 @@ export function ragTone(score: number | null | undefined): PillTone {
 
 // ── Pill ────────────────────────────────────────────────────────────────────
 
-export type PillTone = 'gray' | 'green' | 'amber' | 'red' | 'teal' | 'gold' | 'navy'
+export type PillTone = 'gray' | 'green' | 'amber' | 'red' | 'turquoise' | 'navy'
 
 const PILL_STYLES: Record<PillTone, string> = {
-  gray:  'bg-paper-2 text-ink-600 border-line',
-  green: 'bg-rag-green-100 text-rag-green-700 border-rag-green-500/25',
-  amber: 'bg-rag-amber-100 text-rag-amber-700 border-rag-amber-500/25',
-  red:   'bg-rag-red-100   text-rag-red-700   border-rag-red-500/25',
-  teal:  'bg-teal-100 text-teal-700 border-teal-500/25',
-  gold:  'bg-gold-100  text-gold-600  border-gold-500/30',
-  navy:  'bg-navy-700  text-white     border-navy-700',
+  gray:      'bg-paper-2 text-ink-600 border-line',
+  green:     'bg-rag-green-100 text-rag-green-700 border-rag-green-500/25',
+  amber:     'bg-rag-amber-100 text-rag-amber-700 border-rag-amber-500/25',
+  red:       'bg-rag-red-100   text-rag-red-700   border-rag-red-500/25',
+  turquoise: 'bg-turquoise-100 text-turquoise-700 border-turquoise-500/25',
+  navy:      'bg-navy-700  text-white     border-navy-700',
 }
 
 const DOT_STYLES: Record<PillTone, string> = {
-  gray:  'bg-ink-300',
-  green: 'bg-rag-green-500',
-  amber: 'bg-rag-amber-500',
-  red:   'bg-rag-red-500',
-  teal:  'bg-teal-500',
-  gold:  'bg-gold-500',
-  navy:  'bg-teal-500',
+  gray:      'bg-ink-300',
+  green:     'bg-rag-green-500',
+  amber:     'bg-rag-amber-500',
+  red:       'bg-rag-red-500',
+  turquoise: 'bg-turquoise-500',
+  navy:      'bg-turquoise-500',
 }
 
 interface PillProps {
@@ -127,7 +125,7 @@ interface SparklineProps {
   height?: number
 }
 
-export function Sparkline({ values, color = '#00B09C', width = 80, height = 28 }: SparklineProps) {
+export function Sparkline({ values, color = '#1FBCD4', width = 80, height = 28 }: SparklineProps) {
   const max = Math.max(...values, 1)
   const min = Math.min(...values, 0)
   const range = max - min || 1

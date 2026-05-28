@@ -18,7 +18,7 @@ export const brand = {
   logoUrl:      import.meta.env.VITE_BRAND_LOGO
                   ? `${import.meta.env.BASE_URL}${(import.meta.env.VITE_BRAND_LOGO as string).replace(/^\//, '')}`
                   : null,
-  primaryColor: import.meta.env.VITE_BRAND_COLOR       ?? '#0d9488', // teal-600
+  primaryColor: import.meta.env.VITE_BRAND_COLOR       ?? '#1E4A82', // navy-700 (brand blue)
   footerText:   import.meta.env.VITE_BRAND_FOOTER      ?? '© 2026 ARB AI Agent',
 
   // API coordinates — stable-v1 pins to v1; new-ui-v1 targets v2

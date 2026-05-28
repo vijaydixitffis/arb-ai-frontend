@@ -54,7 +54,7 @@ export default function AdminDashboard() {
   const statusColor = (status: string) => {
     if (status === 'approved') return 'bg-green-100 text-green-700'
     if (status === 'rejected') return 'bg-red-100 text-red-700'
-    if (status === 'reviewing') return 'bg-teal-100 text-teal-700'
+    if (status === 'reviewing') return 'bg-turquoise-100 text-turquoise-700'
     if (status === 'submitted') return 'bg-blue-100 text-blue-700'
     return 'bg-slate-100 text-slate-600'
   }
@@ -64,7 +64,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-1">
-          <div className="w-9 h-9 bg-teal-600 rounded-lg flex items-center justify-center">
+          <div className="w-9 h-9 bg-turquoise-600 rounded-lg flex items-center justify-center">
             <Shield className="w-5 h-5 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
@@ -77,7 +77,7 @@ export default function AdminDashboard() {
       {/* Stats */}
       {analyticsLoading ? (
         <div className="flex items-center gap-2 text-slate-400 mb-8">
-          <div className="w-4 h-4 border-2 border-slate-200 border-t-teal-500 rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-slate-200 border-t-turquoise-500 rounded-full animate-spin" />
           Loading analytics…
         </div>
       ) : summary ? (
@@ -86,9 +86,9 @@ export default function AdminDashboard() {
           <StatCard label="Pending"             value={summary.pending_reviews}  icon={Clock}           color="text-amber-600" />
           <StatCard label="Approved"            value={summary.approved_reviews} icon={CheckCircle}     color="text-green-600" />
           <StatCard label="Rejected"            value={summary.rejected_reviews} icon={XCircle}         color="text-red-600"   />
-          <StatCard label="This Month"          value={summary.reviews_this_month} icon={TrendingUp}    color="text-teal-600"  />
+          <StatCard label="This Month"          value={summary.reviews_this_month} icon={TrendingUp}    color="text-turquoise-600"  />
           <StatCard label="Approval Rate"       value={summary.approval_rate != null ? `${summary.approval_rate}%` : '—'} icon={CheckCircle} color="text-green-600" />
-          <StatCard label="Avg Domain Score"    value={summary.avg_domain_score != null ? summary.avg_domain_score.toFixed(1) : '—'} icon={BarChart3} color="text-teal-600" />
+          <StatCard label="Avg Domain Score"    value={summary.avg_domain_score != null ? summary.avg_domain_score.toFixed(1) : '—'} icon={BarChart3} color="text-turquoise-600" />
           <StatCard label="Deferred"            value={summary.deferred_reviews} icon={AlertCircle}     color="text-slate-500"  />
         </div>
       ) : null}
@@ -101,10 +101,10 @@ export default function AdminDashboard() {
             <button
               key={path}
               onClick={() => navigate(path)}
-              className="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:border-teal-300 hover:bg-teal-50/40 transition-colors text-left group"
+              className="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:border-turquoise-300 hover:bg-turquoise-50/40 transition-colors text-left group"
             >
-              <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center group-hover:bg-teal-100 flex-shrink-0 transition-colors">
-                <Icon className="w-4 h-4 text-slate-600 group-hover:text-teal-600" />
+              <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center group-hover:bg-turquoise-100 flex-shrink-0 transition-colors">
+                <Icon className="w-4 h-4 text-slate-600 group-hover:text-turquoise-600" />
               </div>
               <span className="text-sm font-medium text-slate-700">{label}</span>
             </button>

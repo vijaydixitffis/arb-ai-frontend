@@ -89,22 +89,22 @@ function StepRail({ step, lastSaved }: { step: number; lastSaved: Date | null })
             {s.id < STEPS.length && (
               <div
                 className="absolute left-[5px] top-4 bottom-[-2px] w-[1px]"
-                style={{ background: isDone ? '#00B09C' : '#D9E2EA' }}
+                style={{ background: isDone ? '#1FBCD4' : '#D9E2EA' }}
               />
             )}
             {/* Step dot */}
             <div
               className="absolute left-0 top-1 w-[11px] h-[11px] rounded-full"
               style={{
-                background: isDone ? '#00B09C' : isActive ? '#fff' : '#EEF2F6',
-                border: `1.5px solid ${isActive ? '#00B09C' : isDone ? '#00B09C' : '#C9D4DE'}`,
-                boxShadow: isActive ? '0 0 0 4px rgba(0,176,156,0.15)' : 'none',
+                background: isDone ? '#1FBCD4' : isActive ? '#fff' : '#EEF2F6',
+                border: `1.5px solid ${isActive ? '#1FBCD4' : isDone ? '#1FBCD4' : '#C9D4DE'}`,
+                boxShadow: isActive ? '0 0 0 4px rgba(31,188,212,0.18)' : 'none',
               }}
             />
             {/* Label */}
             <div
               className="flex items-center gap-1.5"
-              style={{ color: isActive ? '#0E1B2C' : isDone ? '#007D6E' : '#4A6480' }}
+              style={{ color: isActive ? '#0E1B2C' : isDone ? '#0E8FA8' : '#4A6480' }}
             >
               <Icon className="w-3.5 h-3.5 flex-shrink-0" />
               <span
@@ -120,8 +120,8 @@ function StepRail({ step, lastSaved }: { step: number; lastSaved: Date | null })
       })}
 
       {/* Autosave indicator */}
-      <div className="flex items-center gap-1.5 pl-[22px] mt-2 text-[11px] text-teal-700">
-        <span className="w-1.5 h-1.5 rounded-full bg-teal-500 flex-shrink-0" />
+      <div className="flex items-center gap-1.5 pl-[22px] mt-2 text-[11px] text-turquoise-700">
+        <span className="w-1.5 h-1.5 rounded-full bg-turquoise-500 flex-shrink-0" />
         {lastSaved
           ? `Autosaved ${Math.round((Date.now() - lastSaved.getTime()) / 1000)}s ago`
           : 'Not yet saved'}
@@ -152,7 +152,7 @@ function Field({ label, icon: Icon, required, hint, children }: {
   )
 }
 
-const inputCls = 'w-full border border-line bg-white rounded-[8px] px-3 py-[9px] text-[13.5px] text-ink-700 outline-none focus:border-teal-500 focus:shadow-[0_0_0_3px_rgba(0,176,156,0.15)] transition-all font-sans'
+const inputCls = 'w-full border border-line bg-white rounded-[8px] px-3 py-[9px] text-[13.5px] text-ink-700 outline-none focus:border-turquoise-500 focus:shadow-[0_0_0_3px_rgba(31,188,212,0.18)] transition-all font-sans'
 const textareaCls = `${inputCls} min-h-[80px] resize-y`
 
 // ── Step 1: Context ───────────────────────────────────────────────────────────
@@ -161,7 +161,7 @@ function StepContext({ data, set }: { data: WizardData; set: (p: Partial<WizardD
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <div className="font-cond font-semibold text-[11px] uppercase tracking-[0.16em] text-teal-700 mb-1">
+        <div className="font-cond font-semibold text-[11px] uppercase tracking-[0.16em] text-turquoise-700 mb-1">
           Step 1 / 4
         </div>
         <h2 className="font-cond font-bold text-[22px] text-ink-900 mb-1 tracking-[0.01em]">
@@ -195,11 +195,11 @@ function StepContext({ data, set }: { data: WizardData; set: (p: Partial<WizardD
         {/* AI suggestion callout — UI only until backend endpoint ready */}
         <div
           className="rounded-[8px] p-[12px_14px] self-start"
-          style={{ background: '#EEF9F7', border: '1px solid rgba(0,176,156,0.25)' }}
+          style={{ background: '#F1FAFC', border: '1px solid rgba(31,188,212,0.25)' }}
         >
-          <div className="flex items-center gap-1.5 text-teal-700 mb-2">
+          <div className="flex items-center gap-1.5 text-turquoise-700 mb-2">
             <Sparkles className="w-3.5 h-3.5" />
-            <span className="font-cond font-semibold text-[10px] uppercase tracking-[0.16em] text-teal-700">
+            <span className="font-cond font-semibold text-[10px] uppercase tracking-[0.16em] text-turquoise-700">
               AI suggests
             </span>
           </div>
@@ -211,7 +211,7 @@ function StepContext({ data, set }: { data: WizardData; set: (p: Partial<WizardD
           {/* NOTE: wire to AI suggestion endpoint when ready */}
           <button
             disabled
-            className="mt-2 h-6 px-2.5 rounded-[6px] text-[11.5px] text-teal-700 border border-teal-500 bg-transparent opacity-40 cursor-not-allowed"
+            className="mt-2 h-6 px-2.5 rounded-[6px] text-[11.5px] text-turquoise-700 border border-turquoise-500 bg-transparent opacity-40 cursor-not-allowed"
           >
             Use suggestion
           </button>
@@ -275,7 +275,7 @@ function StepScope({ data, set }: { data: WizardData; set: (p: Partial<WizardDat
   return (
     <div className="flex flex-col gap-[22px]">
       <div>
-        <div className="font-cond font-semibold text-[11px] uppercase tracking-[0.16em] text-teal-700 mb-1">
+        <div className="font-cond font-semibold text-[11px] uppercase tracking-[0.16em] text-turquoise-700 mb-1">
           Step 2 / 4
         </div>
         <h2 className="font-cond font-bold text-[22px] text-ink-900 mb-1 tracking-[0.01em]">
@@ -347,15 +347,15 @@ function StepScope({ data, set }: { data: WizardData; set: (p: Partial<WizardDat
                 onClick={() => set({ architecture_disposition: d.value })}
                 className="text-left cursor-pointer rounded-[8px] p-[10px_12px] flex flex-col gap-1 transition-all border"
                 style={{
-                  background: sel ? '#EEF9F7' : '#fff',
-                  borderColor: sel ? '#00B09C' : '#D9E2EA',
+                  background: sel ? '#F1FAFC' : '#fff',
+                  borderColor: sel ? '#1FBCD4' : '#D9E2EA',
                 }}
               >
                 <div className="flex items-center gap-2">
                   <span
                     className="w-[22px] h-[22px] rounded-[6px] grid place-items-center flex-shrink-0"
                     style={{
-                      background: sel ? '#00B09C' : '#EEF2F6',
+                      background: sel ? '#1FBCD4' : '#EEF2F6',
                       color: sel ? '#fff' : '#4A6480',
                     }}
                   >
@@ -400,16 +400,16 @@ function StepScope({ data, set }: { data: WizardData; set: (p: Partial<WizardDat
                 onClick={() => toggleDomain(d.slug)}
                 className="text-left cursor-pointer rounded-[8px] px-3 py-[9px] flex items-center gap-[9px] transition-all border relative"
                 style={{
-                  background: sel ? '#EEF9F7' : '#fff',
-                  borderColor: sel ? '#00B09C' : '#D9E2EA',
+                  background: sel ? '#F1FAFC' : '#fff',
+                  borderColor: sel ? '#1FBCD4' : '#D9E2EA',
                 }}
               >
                 {/* Checkbox */}
                 <span
                   className="w-3.5 h-3.5 rounded-[3px] flex-shrink-0 grid place-items-center"
                   style={{
-                    border: `1.5px solid ${sel ? '#00B09C' : '#A6BAC9'}`,
-                    background: sel ? '#00B09C' : 'transparent',
+                    border: `1.5px solid ${sel ? '#1FBCD4' : '#A6BAC9'}`,
+                    background: sel ? '#1FBCD4' : 'transparent',
                     color: '#fff',
                   }}
                 >
@@ -440,11 +440,11 @@ function StepScope({ data, set }: { data: WizardData; set: (p: Partial<WizardDat
 // ── Checklist question dialog ─────────────────────────────────────────────────
 
 const CHECKLIST_COLORS = [
-  { bg: '#EEF9F7', border: '#9FE6DC', text: '#007D6E' },  // teal-50  · teal-200 · teal-700
-  { bg: '#FEF3DC', border: '#F5D38A', text: '#B97300' },  // gold-100 · gold-200 · gold-600
+  { bg: '#F1FAFC', border: '#B8ECF3', text: '#0E8FA8' },  // turquoise-50 · turquoise-200 · turquoise-700
+  { bg: '#E2F6FA', border: '#B8ECF3', text: '#14A8BF' },  // turquoise-100 · turquoise-200 · turquoise-600
   { bg: '#EEF2F6', border: '#C9D4DE', text: '#1A2D45' },  // paper-2  · ink-200  · navy-700
   { bg: '#DDF3E5', border: 'rgba(31,165,103,0.35)', text: '#15784D' },  // green-100 · green-500/35 · green-700
-  { bg: '#DFF5F2', border: '#9FE6DC', text: '#007D6E' },  // teal-100 · teal-200 · teal-700
+  { bg: '#E2F6FA', border: '#B8ECF3', text: '#0E8FA8' },  // turquoise-100 · turquoise-200 · turquoise-700
   { bg: '#F4F7FA', border: '#DEE6ED', text: '#2F4865' },  // paper    · ink-100  · ink-600
 ]
 
@@ -508,14 +508,14 @@ function QuestionDialog({ subsection, domain, data, patchData, onClose }: {
                     step={1}
                     value={idx}
                     onChange={e => setAnswer(q.question_code, SLIDER_OPTIONS[+e.target.value])}
-                    className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                    className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-turquoise-500"
                   />
                   <div className="flex justify-between mt-1.5">
                     {SLIDER_LABELS.map((label, i) => (
                       <span
                         key={label}
                         className="text-[11px]"
-                        style={{ color: idx === i ? '#00B09C' : '#6B8299', fontWeight: idx === i ? 700 : 400 }}
+                        style={{ color: idx === i ? '#1FBCD4' : '#6B8299', fontWeight: idx === i ? 700 : 400 }}
                       >
                         {label}
                       </span>
@@ -633,7 +633,7 @@ function StepArtefacts({
     return (
       <div className="flex flex-col gap-5">
         <div>
-          <div className="font-cond font-semibold text-[11px] uppercase tracking-[0.16em] text-teal-700 mb-1">Step 3 / 4</div>
+          <div className="font-cond font-semibold text-[11px] uppercase tracking-[0.16em] text-turquoise-700 mb-1">Step 3 / 4</div>
           <h2 className="font-cond font-bold text-[22px] text-ink-900 mb-1 tracking-[0.01em]">Upload artefacts &amp; answer checklists.</h2>
         </div>
         <div className="flex items-start gap-3 rounded-lg border px-4 py-3" style={{ background: '#FCEED0', borderColor: 'rgba(229,149,0,0.3)' }}>
@@ -647,7 +647,7 @@ function StepArtefacts({
   return (
     <div className="flex flex-col gap-[18px]">
       <div>
-        <div className="font-cond font-semibold text-[11px] uppercase tracking-[0.16em] text-teal-700 mb-1">
+        <div className="font-cond font-semibold text-[11px] uppercase tracking-[0.16em] text-turquoise-700 mb-1">
           Step 3 / 4
         </div>
         <h2 className="font-cond font-bold text-[22px] text-ink-900 mb-1 tracking-[0.01em]">
@@ -738,7 +738,7 @@ function StepArtefacts({
           <div className="flex flex-col gap-1">
             <label className="text-[11px] font-semibold text-ink-500 uppercase tracking-[0.12em]">File</label>
             <div
-              className="flex items-center gap-2 rounded-[8px] border border-line bg-white px-3 py-[9px] text-[13px] text-ink-500 cursor-pointer hover:border-teal-500 transition-colors"
+              className="flex items-center gap-2 rounded-[8px] border border-line bg-white px-3 py-[9px] text-[13px] text-ink-500 cursor-pointer hover:border-turquoise-500 transition-colors"
               onClick={() => fileInputRef.current?.click()}
             >
               <File className="w-3.5 h-3.5 flex-shrink-0" />
@@ -789,7 +789,7 @@ function StepArtefacts({
                 <div className="font-medium text-[13px] text-ink-900 truncate">{art.name}</div>
                 <div className="text-[11px] text-ink-500">{art.fileName}</div>
               </div>
-              <Pill tone="teal">{art.type}</Pill>
+              <Pill tone="turquoise">{art.type}</Pill>
               {art.id && (
                 <button
                   onClick={() => handleDelete(art.id!)}
@@ -894,7 +894,7 @@ function StepReview({
   return (
     <div className="flex flex-col gap-[18px]">
       <div>
-        <div className="font-cond font-semibold text-[11px] uppercase tracking-[0.16em] text-teal-700 mb-1">
+        <div className="font-cond font-semibold text-[11px] uppercase tracking-[0.16em] text-turquoise-700 mb-1">
           Step 4 / 4
         </div>
         <h2 className="font-cond font-bold text-[22px] text-ink-900 mb-1 tracking-[0.01em]">
@@ -922,7 +922,7 @@ function StepReview({
           </div>
           <div>
             <div className="font-cond font-semibold text-[11px] uppercase tracking-[0.16em] text-ink-400 mb-1.5">Disposition</div>
-            {data.architecture_disposition ? <Pill tone="gold">{dispLabel}</Pill> : <span className="text-ink-400 text-[13px]">Not set</span>}
+            {data.architecture_disposition ? <Pill tone="amber">{dispLabel}</Pill> : <span className="text-ink-400 text-[13px]">Not set</span>}
           </div>
           <div>
             <div className="font-cond font-semibold text-[11px] uppercase tracking-[0.16em] text-ink-400 mb-1.5">Domain scope</div>
@@ -966,7 +966,7 @@ function StepReview({
             <div key={i} className="flex gap-2.5 py-1.5">
               <span
                 className="w-[22px] h-[22px] rounded-[6px] grid place-items-center font-cond font-bold text-[12px] flex-shrink-0"
-                style={{ background: '#1A2D45', color: '#00B09C' }}
+                style={{ background: '#1E4A82', color: '#1FBCD4' }}
               >
                 {i + 1}
               </span>
@@ -995,14 +995,14 @@ function StepReview({
       {/* Acknowledgement */}
       <div
         className="flex items-center gap-3 rounded-lg border px-4 py-3"
-        style={{ background: '#EEF9F7', borderColor: 'rgba(0,176,156,0.25)' }}
+        style={{ background: '#F1FAFC', borderColor: 'rgba(31,188,212,0.25)' }}
       >
         <input
           type="checkbox"
           id="ack"
           checked={acknowledged}
           onChange={e => setAcknowledged(e.target.checked)}
-          className="w-4 h-4 accent-teal-500 flex-shrink-0"
+          className="w-4 h-4 accent-turquoise-500 flex-shrink-0"
         />
         <label htmlFor="ack" className="text-[13px] text-ink-700 cursor-pointer select-none">
           I confirm the submission is complete and accurate. The AI agent will analyse and the EA may override.
@@ -1299,7 +1299,7 @@ export default function SubmissionWizard() {
                   onClick={goContinue}
                   disabled={!canContinue || submitting}
                   className="inline-flex items-center gap-2 h-9 px-3.5 rounded-[8px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  style={{ background: '#00B09C', color: '#0B1B2E', borderColor: '#00B09C' }}
+                  style={{ background: '#1FBCD4', color: '#14366B', borderColor: '#1FBCD4' }}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   {submitting ? 'Submitting…' : 'Submit for Review'}

@@ -93,7 +93,7 @@ export default function ReviewStatus() {
       case 'approved':
         return <CheckCircle className="w-8 h-8 text-green-600" />
       case 'conditionally_approved':
-        return <CheckCircle className="w-8 h-8 text-teal-600" />
+        return <CheckCircle className="w-8 h-8 text-turquoise-600" />
       case 'returned':
       case 'rework':
         return <AlertCircle className="w-8 h-8 text-amber-500" />
@@ -212,7 +212,7 @@ export default function ReviewStatus() {
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-turquoise-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading review status...</p>
         </div>
       </div>
@@ -280,9 +280,9 @@ export default function ReviewStatus() {
                       {/* Circle */}
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
                         completed
-                          ? 'bg-teal-600 border-teal-600 text-white'
+                          ? 'bg-turquoise-600 border-turquoise-600 text-white'
                           : active || isAIRange
-                          ? 'bg-teal-600/20 border-teal-400 text-teal-400 animate-pulse'
+                          ? 'bg-turquoise-600/20 border-turquoise-400 text-turquoise-400 animate-pulse'
                           : 'bg-slate-800 border-slate-600 text-slate-500'
                       }`}>
                         {completed ? '✓' : idx + 1}
@@ -301,7 +301,7 @@ export default function ReviewStatus() {
                     {idx < PIPELINE_STEPS.length - 1 && (
                       <div className={`h-0.5 flex-shrink-0 mx-1 transition-all ${
                         idx < activeStep || isTerminal(reviewStatus.status)
-                          ? 'bg-teal-600'
+                          ? 'bg-turquoise-600'
                           : 'bg-slate-700'
                       }`} style={{ width: '20px' }} />
                     )}

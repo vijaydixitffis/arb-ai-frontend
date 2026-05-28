@@ -42,7 +42,7 @@ function SubsectionDrawer({ sub, domains, onClose, onSave }: SubsectionDrawerPro
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Domain</label>
               <select value={domainId} onChange={e => setDomainId(e.target.value)}
-                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500 bg-white">
                 {domains.filter(d => d.is_active).map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
               </select>
             </div>
@@ -50,28 +50,28 @@ function SubsectionDrawer({ sub, domains, onClose, onSave }: SubsectionDrawerPro
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Name</label>
             <input value={name} onChange={e => setName(e.target.value)}
-              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Description</label>
             <textarea value={description} onChange={e => setDesc(e.target.value)} rows={2}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-teal-500" />
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Color Theme</label>
               <input value={colorTheme} onChange={e => setColor(e.target.value)} placeholder="#3b82f6"
-                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Sort Order</label>
               <input type="number" value={sortOrder} onChange={e => setSort(parseInt(e.target.value) || 0)}
-                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => setIsActive(!isActive)}
-              className={`relative w-10 h-5 rounded-full transition-colors ${isActive ? 'bg-teal-500' : 'bg-slate-200'}`}>
+              className={`relative w-10 h-5 rounded-full transition-colors ${isActive ? 'bg-turquoise-500' : 'bg-slate-200'}`}>
               <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${isActive ? 'translate-x-5' : 'translate-x-0.5'}`} />
             </button>
             <span className="text-sm text-slate-600">{isActive ? 'Active' : 'Inactive'}</span>
@@ -81,7 +81,7 @@ function SubsectionDrawer({ sub, domains, onClose, onSave }: SubsectionDrawerPro
         <div className="px-6 py-4 border-t border-slate-100 flex gap-3">
           <button onClick={onClose} className="flex-1 h-10 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50">Cancel</button>
           <button onClick={handleSave} disabled={saving}
-            className="flex-1 h-10 bg-teal-600 text-white rounded-lg text-sm font-semibold hover:bg-teal-700 disabled:opacity-50">
+            className="flex-1 h-10 bg-turquoise-600 text-white rounded-lg text-sm font-semibold hover:bg-turquoise-700 disabled:opacity-50">
             {saving ? 'Saving…' : 'Save'}
           </button>
         </div>
@@ -131,32 +131,32 @@ function QuestionDrawer({ question, subsections, onClose, onSave }: QuestionDraw
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Subsection</label>
                 <select value={subsectionId} onChange={e => setSubId(e.target.value)}
-                  className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                  className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500 bg-white">
                   {subsections.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Question Code</label>
                 <input value={questionCode} onChange={e => setCode(e.target.value)} placeholder="SEC-Q01"
-                  className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono" />
+                  className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500 font-mono" />
               </div>
             </>
           )}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Question Text</label>
             <textarea value={questionText} onChange={e => setText(e.target.value)} rows={3}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-teal-500" />
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Help Text</label>
             <textarea value={helpText} onChange={e => setHelp(e.target.value)} rows={2}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-teal-500" />
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Type</label>
               <select value={questionType} onChange={e => setType(e.target.value)}
-                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500 bg-white">
                 <option value="compliance">Compliance</option>
                 <option value="evidence">Evidence</option>
                 <option value="text">Free Text</option>
@@ -165,16 +165,16 @@ function QuestionDrawer({ question, subsections, onClose, onSave }: QuestionDraw
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Sort Order</label>
               <input type="number" value={sortOrder} onChange={e => setSort(parseInt(e.target.value) || 0)}
-                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <label className="flex items-center gap-2 text-sm text-slate-700">
-              <input type="checkbox" checked={isRequired} onChange={e => setRequired(e.target.checked)} className="w-4 h-4 accent-teal-600" />
+              <input type="checkbox" checked={isRequired} onChange={e => setRequired(e.target.checked)} className="w-4 h-4 accent-turquoise-600" />
               Required question
             </label>
             <label className="flex items-center gap-2 text-sm text-slate-700">
-              <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} className="w-4 h-4 accent-teal-600" />
+              <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} className="w-4 h-4 accent-turquoise-600" />
               Active
             </label>
           </div>
@@ -183,7 +183,7 @@ function QuestionDrawer({ question, subsections, onClose, onSave }: QuestionDraw
         <div className="px-6 py-4 border-t border-slate-100 flex gap-3">
           <button onClick={onClose} className="flex-1 h-10 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50">Cancel</button>
           <button onClick={handleSave} disabled={saving}
-            className="flex-1 h-10 bg-teal-600 text-white rounded-lg text-sm font-semibold hover:bg-teal-700 disabled:opacity-50">
+            className="flex-1 h-10 bg-turquoise-600 text-white rounded-lg text-sm font-semibold hover:bg-turquoise-700 disabled:opacity-50">
             {saving ? 'Saving…' : 'Save'}
           </button>
         </div>
@@ -228,7 +228,7 @@ export default function ChecklistEditor() {
   return (
     <div className="p-8 max-w-5xl mx-auto">
       <div className="flex items-center gap-3 mb-2">
-        <div className="w-9 h-9 bg-teal-600 rounded-lg flex items-center justify-center">
+        <div className="w-9 h-9 bg-turquoise-600 rounded-lg flex items-center justify-center">
           <ListChecks className="w-5 h-5 text-white" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900">Checklist Editor</h1>
@@ -238,13 +238,13 @@ export default function ChecklistEditor() {
       {/* Domain selector */}
       <div className="flex items-center gap-3 mb-6">
         <select value={selectedDomain} onChange={e => setSelectedDomain(e.target.value)}
-          className="h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white min-w-[200px]">
+          className="h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500 bg-white min-w-[200px]">
           <option value="">— Select domain —</option>
           {activeDomains.map(d => <option key={d.id} value={d.id}>{d.icon} {d.name}</option>)}
         </select>
         {selectedDomain && (
           <button onClick={() => setSubDrawer(null)}
-            className="flex items-center gap-2 px-3 h-10 bg-teal-600 text-white rounded-lg text-sm font-semibold hover:bg-teal-700">
+            className="flex items-center gap-2 px-3 h-10 bg-turquoise-600 text-white rounded-lg text-sm font-semibold hover:bg-turquoise-700">
             <Plus className="w-4 h-4" /> Add Subsection
           </button>
         )}
@@ -259,7 +259,7 @@ export default function ChecklistEditor() {
 
       {loading && (
         <div className="flex items-center gap-2 text-slate-400 py-8">
-          <div className="w-4 h-4 border-2 border-slate-200 border-t-teal-500 rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-slate-200 border-t-turquoise-500 rounded-full animate-spin" />
           Loading…
         </div>
       )}
@@ -283,7 +283,7 @@ export default function ChecklistEditor() {
                   </div>
                   <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                     <button onClick={() => setSubDrawer(sub)}
-                      className="p-1.5 hover:bg-teal-50 rounded text-slate-400 hover:text-teal-600">
+                      className="p-1.5 hover:bg-turquoise-50 rounded text-slate-400 hover:text-turquoise-600">
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -292,7 +292,7 @@ export default function ChecklistEditor() {
                   <div className="border-t border-slate-100 px-5 py-3">
                     <div className="flex justify-end mb-2">
                       <button onClick={() => setQDrawer(null)}
-                        className="flex items-center gap-1 px-2.5 h-7 border border-slate-200 rounded text-xs text-slate-600 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700">
+                        className="flex items-center gap-1 px-2.5 h-7 border border-slate-200 rounded text-xs text-slate-600 hover:bg-turquoise-50 hover:border-turquoise-300 hover:text-turquoise-700">
                         <Plus className="w-3 h-3" /> Add Question
                       </button>
                     </div>
@@ -308,7 +308,7 @@ export default function ChecklistEditor() {
                               {q.is_required && <span className="text-xs text-red-500 flex-shrink-0">required</span>}
                             </div>
                             <button onClick={() => setQDrawer(q)}
-                              className="p-1 hover:bg-teal-50 rounded text-slate-400 hover:text-teal-600 flex-shrink-0">
+                              className="p-1 hover:bg-turquoise-50 rounded text-slate-400 hover:text-turquoise-600 flex-shrink-0">
                               <Pencil className="w-3 h-3" />
                             </button>
                           </div>

@@ -185,7 +185,7 @@ function EAOverrideWidget({
             setOpen(true)
           }}
           className="text-xs px-1.5 py-0.5 rounded border flex items-center gap-1 font-medium transition-colors"
-          style={{ borderColor: 'rgba(217,138,0,0.3)', color: '#D98A00' }}
+          style={{ borderColor: 'rgba(163,101,0,0.3)', color: '#A36500' }}
         >
           <Pencil className="w-3 h-3" /> Edit
         </button>
@@ -197,8 +197,8 @@ function EAOverrideWidget({
     <div>
       {!open ? (
         <button onClick={() => setOpen(true)}
-          className="text-xs px-2 py-0.5 rounded border border-gold-200 text-gold-600 hover:bg-gold-100 flex items-center gap-1 font-medium transition-colors"
-          style={{ borderColor: 'rgba(217,138,0,0.3)', color: '#D98A00' }}>
+          className="text-xs px-2 py-0.5 rounded border border-rag-amber-100 text-rag-amber-700 hover:bg-rag-amber-100/50 flex items-center gap-1 font-medium transition-colors"
+          style={{ borderColor: 'rgba(163,101,0,0.3)', color: '#A36500' }}>
           <Pencil className="w-3 h-3" /> Override
         </button>
       ) : (
@@ -345,19 +345,19 @@ function RecommendationBanner({ review, totalFindings, totalBlockers, totalActio
         {/* AI icon + decision */}
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="w-[52px] h-[52px] rounded-[12px] grid place-items-center flex-shrink-0"
-            style={{ background: '#00B09C' }}>
-            <Zap className="w-[22px] h-[22px]" style={{ color: '#0B1B2E' }} />
+            style={{ background: '#1FBCD4' }}>
+            <Zap className="w-[22px] h-[22px]" style={{ color: '#14366B' }} />
           </div>
           <div className="min-w-0">
             <div className="font-cond text-[10.5px] uppercase tracking-[0.2em] mb-1"
-              style={{ color: '#00B09C' }}>AI Agent recommendation</div>
+              style={{ color: '#1FBCD4' }}>AI Agent recommendation</div>
             <div className="font-cond font-bold text-[24px] leading-[1.15] text-white">{recLabel}</div>
             <div className="font-cond font-semibold text-[10.5px] uppercase tracking-[0.12em] mt-1"
-              style={{ color: '#00B09C' }}>
+              style={{ color: '#1FBCD4' }}>
               Aggregate {aggScore}/5 · {aggLabel}
               {scoreCorrections.length > 0 && (
                 <span className="ml-2 px-1.5 py-0.5 rounded text-[9px] font-bold"
-                  style={{ background: 'rgba(0,176,156,0.2)', color: '#00B09C' }}>
+                  style={{ background: 'rgba(31,188,212,0.2)', color: '#1FBCD4' }}>
                   {scoreCorrections.length} score correction{scoreCorrections.length > 1 ? 's' : ''} applied
                 </span>
               )}
@@ -403,12 +403,19 @@ function RecommendationBanner({ review, totalFindings, totalBlockers, totalActio
           </p>
           {scoreCorrections.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
-              {scoreCorrections.map((c: any, i: number) => (
+              {Object.values(
+                scoreCorrections.reduce((acc: Record<string, { c: any; count: number }>, c: any) => {
+                  const key = `${c.domain}|${c.original_score}|${c.corrected_score}`
+                  acc[key] = acc[key] ? { c, count: acc[key].count + 1 } : { c, count: 1 }
+                  return acc
+                }, {})
+              ).map(({ c, count }, i) => (
                 <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px]"
                   style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}>
                   <span className="capitalize">{(c.domain ?? '').replace(/_/g, ' ')}</span>
+                  {count > 1 && <span style={{ color: 'rgba(255,255,255,0.35)' }}>×{count}</span>}
                   <span style={{ color: 'rgba(255,255,255,0.35)' }}>{c.original_score}→</span>
-                  <span style={{ color: c.corrected_score < c.original_score ? '#EF4444' : '#00B09C' }}>{c.corrected_score}</span>
+                  <span style={{ color: c.corrected_score < c.original_score ? '#EF4444' : '#1FBCD4' }}>{c.corrected_score}</span>
                 </span>
               ))}
             </div>
@@ -528,7 +535,7 @@ function FindingRow({ f, idx, last, isEA, reviewId, eaOverrides, onOverrideSaved
           <div className="flex flex-wrap gap-3 mt-2 text-[11.5px] text-ink-500">
             {f.standard_violated && <span><strong className="text-ink-700">Standard:</strong> {f.standard_violated}</span>}
             {f.evidence_source    && <span><strong className="text-ink-700">Evidence:</strong> {f.evidence_source}</span>}
-            {f.kb_ref             && <span className="font-mono text-teal-700">{f.kb_ref} ↗</span>}
+            {f.kb_ref             && <span className="font-mono text-turquoise-700">{f.kb_ref} ↗</span>}
           </div>
         </div>
         {/* Right: override */}
@@ -797,7 +804,7 @@ function FindingsStream({ allFindings, displayActions, displayAdrs, displayRecom
 
 const DECISION_OPTIONS = [
   { key: 'APPROVE',               label: 'Approve',              desc: 'Meets standards. Minor actions tracked only.',     tone: 'green', Icon: CheckCircle },
-  { key: 'CONDITIONALLY_APPROVE', label: 'Approve with Actions', desc: 'Conditional on gate actions completing.',          tone: 'teal',  Icon: Zap },
+  { key: 'CONDITIONALLY_APPROVE', label: 'Approve with Actions', desc: 'Conditional on gate actions completing.',          tone: 'turquoise',  Icon: Zap },
   { key: 'RETURN',                label: 'Return to SA',         desc: 'Gaps identified — SA resubmits affected domains.', tone: 'amber', Icon: Clock },
   { key: 'DEFER',                 label: 'Defer / Reject',       desc: 'Misaligned, unsafe or unviable. Terminal.',       tone: 'red',   Icon: XCircle },
 ]
@@ -811,10 +818,10 @@ const DECISION_PAST_LABELS: Record<string, string> = {
 function fmtDecision(d: string) { return DECISION_PAST_LABELS[d] || d.replace(/_/g, ' ') }
 
 const SEL_BG: Record<string, string> = {
-  green: '#F0FDF4', teal: '#F0FDFA', amber: '#FFFBEB', red: '#FEF2F2',
+  green: '#F0FDF4', turquoise: '#F1FAFC', amber: '#FFFBEB', red: '#FEF2F2',
 }
 const SEL_ICON_BG: Record<string, string> = {
-  green: '#16A34A', teal: '#00B09C', amber: '#F59E0B', red: '#EF4444',
+  green: '#16A34A', turquoise: '#1FBCD4', amber: '#F59E0B', red: '#EF4444',
 }
 
 // ── AuditLane — placeholder; wire to GET /reviews/{id}/audit-log when backend ready ──
@@ -867,16 +874,16 @@ function AuditLane({ review }: { review: any }) {
                   <div className="absolute left-[6px] top-5 bottom-0 w-px bg-line" />
                 )}
                 <div className="w-3.5 h-3.5 rounded-full flex-shrink-0 mt-1"
-                  style={{ background: e.isOverride ? '#D98A00' : '#C8D4DF', border: '2px solid #fff', boxShadow: '0 0 0 1px #D9E2EA' }} />
+                  style={{ background: e.isOverride ? '#E59500' : '#C8D4DF', border: '2px solid #fff', boxShadow: '0 0 0 1px #D9E2EA' }} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2 flex-wrap">
                     <span className="font-mono text-[11px] text-ink-400">{e.time}</span>
                     <strong className="text-[13px] text-ink-800">{e.actor}</strong>
-                    {e.isOverride && <Pill tone="gold">EA Override</Pill>}
+                    {e.isOverride && <Pill tone="amber">EA Override</Pill>}
                   </div>
                   <div className="text-[13px] text-ink-600 mt-0.5">{e.what}</div>
                   {e.rationale && (
-                    <div className="mt-1.5 text-[12px] text-gold-600 italic px-3 py-1.5 rounded-[6px]"
+                    <div className="mt-1.5 text-[12px] text-rag-amber-700 italic px-3 py-1.5 rounded-[6px]"
                       style={{ background: '#FEF3C7' }}>"{e.rationale}"</div>
                   )}
                 </div>
@@ -905,7 +912,7 @@ function DecisionTray({ review, isEA, eaMode, setEaMode, eaAnnotations, setEaAnn
 
   return (
     <div className="bg-white rounded-[12px] border border-line sticky top-6 overflow-hidden"
-      style={{ borderTop: '3px solid #D98A00' }}>
+      style={{ borderTop: '3px solid #E59500' }}>
 
       {/* Head */}
       <div className="px-5 py-4 border-b border-line">
@@ -917,22 +924,22 @@ function DecisionTray({ review, isEA, eaMode, setEaMode, eaAnnotations, setEaAnn
         </div>
         {/* SLA placeholder — wire to review.sla_hours once backend provides it */}
         <div className="text-[12px] text-ink-500 mt-1">
-          SLA: <strong className="text-gold-600">— hrs remaining</strong>
+          SLA: <strong className="text-rag-amber-700">— hrs remaining</strong>
         </div>
       </div>
 
       {/* review_ready: not yet opened */}
       {status === 'review_ready' && (
         <div className="p-5 text-center">
-          <div className="w-12 h-12 rounded-full bg-teal-50 grid place-items-center mx-auto mb-3">
-            <CheckCircle className="w-6 h-6 text-teal-600" />
+          <div className="w-12 h-12 rounded-full bg-turquoise-50 grid place-items-center mx-auto mb-3">
+            <CheckCircle className="w-6 h-6 text-turquoise-600" />
           </div>
           <p className="font-cond font-semibold text-[14px] text-ink-900 mb-1">AI Review Complete</p>
           <p className="text-[12.5px] text-ink-500 mb-4">Ready for Gate 2 EA review.</p>
           {isEA && (
             <button onClick={onOpen} disabled={submitting}
               className="w-full py-2.5 rounded-[8px] font-cond font-semibold text-[13.5px] text-white transition-colors"
-              style={{ background: '#00B09C' }}>
+              style={{ background: '#1FBCD4' }}>
               {submitting ? 'Opening…' : 'Open for EA Review'}
             </button>
           )}
@@ -1061,7 +1068,7 @@ function DecisionTray({ review, isEA, eaMode, setEaMode, eaAnnotations, setEaAnn
                     <input type="text" value={reworkGapInput} onChange={e => setReworkGapInput(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter' && reworkGapInput.trim()) { setReworkGaps([...reworkGaps, reworkGapInput.trim()]); setReworkGapInput('') } }}
                       placeholder="Add an action item…"
-                      className="flex-1 border border-line rounded-[8px] px-3 py-2 text-[12.5px] text-ink-700 focus:outline-none focus:border-teal-500" />
+                      className="flex-1 border border-line rounded-[8px] px-3 py-2 text-[12.5px] text-ink-700 focus:outline-none focus:border-turquoise-500" />
                     <button onClick={() => { if (reworkGapInput.trim()) { setReworkGaps([...reworkGaps, reworkGapInput.trim()]); setReworkGapInput('') } }}
                       className="px-3 py-2 rounded-[8px] border border-line text-ink-600 hover:bg-paper-2 transition-colors">
                       <Plus className="w-4 h-4" />
@@ -1103,7 +1110,7 @@ function DecisionTray({ review, isEA, eaMode, setEaMode, eaAnnotations, setEaAnn
                 <button onClick={onSubmit}
                   disabled={submitting || !isEA || (eaMode === 'DEFER' && eaAnnotations.trim().length < 50)}
                   className="flex-1 py-2.5 rounded-[8px] font-cond font-semibold text-[13.5px] text-white transition-colors disabled:opacity-50"
-                  style={{ background: eaMode === 'APPROVE' ? '#16A34A' : eaMode === 'CONDITIONALLY_APPROVE' ? '#00B09C' : eaMode === 'RETURN' ? '#F59E0B' : '#EF4444' }}>
+                  style={{ background: eaMode === 'APPROVE' ? '#16A34A' : eaMode === 'CONDITIONALLY_APPROVE' ? '#1FBCD4' : eaMode === 'RETURN' ? '#F59E0B' : '#EF4444' }}>
                   {submitting ? 'Submitting…'
                     : eaMode === 'APPROVE' ? 'Confirm Approval'
                     : eaMode === 'CONDITIONALLY_APPROVE' ? 'Confirm Conditional'
@@ -1163,7 +1170,7 @@ function RetriggerModal({ scopeDomains, triggeringAI, onRun, onClose }: {
                 </span>
                 <button
                   onClick={() => setSelected(allSelected ? [] : [...scopeDomains])}
-                  className="text-[12.5px] font-medium text-teal-600 hover:text-teal-800 transition-colors"
+                  className="text-[12.5px] font-medium text-turquoise-600 hover:text-turquoise-800 transition-colors"
                 >
                   {allSelected ? 'Deselect all' : 'Select all'}
                 </button>
@@ -1175,11 +1182,11 @@ function RetriggerModal({ scopeDomains, triggeringAI, onRun, onClose }: {
                     <button key={slug} type="button" onClick={() => toggle(slug)}
                       className="w-full flex items-center gap-3 rounded-[8px] border-2 px-3.5 py-2.5 text-left transition-all"
                       style={{
-                        borderColor: checked ? '#00B09C' : '#D9E2EA',
-                        background:  checked ? '#F0FDFB' : 'transparent',
+                        borderColor: checked ? '#1FBCD4' : '#D9E2EA',
+                        background:  checked ? '#F1FAFC' : 'transparent',
                       }}>
                       <div className="w-4 h-4 rounded flex-shrink-0 grid place-items-center border-2 transition-all"
-                        style={{ background: checked ? '#00B09C' : 'transparent', borderColor: checked ? '#00B09C' : '#CBD5E1' }}>
+                        style={{ background: checked ? '#1FBCD4' : 'transparent', borderColor: checked ? '#1FBCD4' : '#CBD5E1' }}>
                         {checked && <Check className="w-2.5 h-2.5 text-white" />}
                       </div>
                       <span className="text-[13.5px] font-medium text-ink-800 capitalize">
@@ -1203,7 +1210,7 @@ function RetriggerModal({ scopeDomains, triggeringAI, onRun, onClose }: {
             onClick={() => onRun(selected)}
             disabled={triggeringAI || selected.length === 0}
             className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 rounded-[8px] font-cond font-semibold text-[13.5px] text-white transition-colors disabled:opacity-50"
-            style={{ background: '#00B09C' }}
+            style={{ background: '#1FBCD4' }}
           >
             <Zap className="w-3.5 h-3.5" />
             {triggeringAI
@@ -1404,7 +1411,7 @@ export default function ReviewDashboard() {
   if (loading) return (
     <div className="flex items-center justify-center min-h-full">
       <div className="text-center">
-        <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <div className="w-8 h-8 border-4 border-turquoise-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
         <p className="text-[13px] text-ink-500">Loading ARB dossier…</p>
       </div>
     </div>
@@ -1415,7 +1422,7 @@ export default function ReviewDashboard() {
       <div className="text-center">
         <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
         <p className="text-[14px] text-red-600 font-medium mb-4">{error}</p>
-        <button onClick={() => navigate('/dashboard')} className="text-[13px] text-teal-600 underline">Back to Dashboard</button>
+        <button onClick={() => navigate('/dashboard')} className="text-[13px] text-turquoise-600 underline">Back to Dashboard</button>
       </div>
     </div>
   )
@@ -1439,11 +1446,11 @@ export default function ReviewDashboard() {
     status === 'agent_failed'           ? 'Agent Failed'     :
     status.replace(/_/g, ' ')
 
-  const statusTone: 'teal' | 'gold' | 'green' | 'red' | 'amber' | 'gray' | 'navy' =
-    status === 'ea_reviewing'           ? 'teal'   :
-    status === 'review_ready'           ? 'gold'   :
-    status === 'approved'               ? 'green'  :
-    status === 'conditionally_approved' ? 'teal'   :
+  const statusTone: 'turquoise' | 'amber' | 'green' | 'red' | 'gray' | 'navy' =
+    status === 'ea_reviewing'           ? 'turquoise' :
+    status === 'review_ready'           ? 'amber'     :
+    status === 'approved'               ? 'green'     :
+    status === 'conditionally_approved' ? 'turquoise' :
     status === 'rejected'               ? 'red'    :
     status === 'returned'               ? 'amber'  :
     status === 'deferred'               ? 'amber'  :
@@ -1484,7 +1491,7 @@ export default function ReviewDashboard() {
           </h1>
           <div className="flex items-center flex-wrap gap-2 mt-2">
             {ptxGate     && <Pill tone="navy">{ptxGate}</Pill>}
-            {disposition && <Pill tone="gold">{disposition}</Pill>}
+            {disposition && <Pill tone="amber">{disposition}</Pill>}
             <Pill tone={statusTone} dot={['ea_reviewing', 'analysing'].includes(status)}>{statusLabel}</Pill>
             <span className="text-[12px] text-ink-400 font-mono">
               {review?.arb_ref || (submissionId ? toARBRef(submissionId, review?.created_at) : '')}
@@ -1692,9 +1699,9 @@ export default function ReviewDashboard() {
           {orderedSlugs.length === 0 && (
             isSubmittedAwaitingAI ? (
               <div className="bg-white rounded-[12px] border border-line p-10 text-center"
-                style={{ borderTop: '3px solid #00B09C' }}>
-                <div className="w-14 h-14 rounded-full bg-teal-50 grid place-items-center mx-auto mb-4">
-                  <Zap className="w-7 h-7 text-teal-600" />
+                style={{ borderTop: '3px solid #1FBCD4' }}>
+                <div className="w-14 h-14 rounded-full bg-turquoise-50 grid place-items-center mx-auto mb-4">
+                  <Zap className="w-7 h-7 text-turquoise-600" />
                 </div>
                 <p className="font-cond font-bold text-[18px] text-ink-900 mb-1">Ready to analyse</p>
                 <p className="text-[13px] text-ink-500 mb-5 max-w-xs mx-auto">
@@ -1704,7 +1711,7 @@ export default function ReviewDashboard() {
                   onClick={() => setShowRetrigger(true)}
                   disabled={triggeringAI}
                   className="inline-flex items-center gap-2 h-10 px-5 rounded-[8px] font-cond font-semibold text-[14px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ background: '#00B09C', color: '#0B1B2E' }}
+                  style={{ background: '#1FBCD4', color: '#14366B' }}
                 >
                   <Zap className="w-4 h-4" />
                   {triggeringAI ? 'Starting…' : 'Start AI review'}

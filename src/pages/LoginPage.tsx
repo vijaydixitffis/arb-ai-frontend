@@ -11,7 +11,7 @@ const STATS = [
 
 const DECISIONS = [
   { label: 'Approve',             dot: '#16A34A' },
-  { label: 'Approve w/ Actions',  dot: '#00B09C' },
+  { label: 'Approve w/ Actions',  dot: '#1FBCD4' },
   { label: 'Defer',               dot: '#F59E0B' },
   { label: 'Reject',              dot: '#EF4444' },
 ]
@@ -72,22 +72,22 @@ export default function LoginPage() {
       {/* ── Left panel — navy brand ── */}
       <div
         className="hidden lg:flex lg:w-[52%] flex-col justify-between p-12 xl:p-16"
-        style={{ background: '#1A2D45' }}
+        style={{ background: '#1E4A82' }}
       >
         {/* Logo block */}
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-[10px] grid place-items-center flex-shrink-0"
-            style={{ background: '#00B09C', boxShadow: 'inset 0 -3px 0 rgba(0,0,0,0.15)' }}
+            style={{ background: '#1FBCD4', boxShadow: 'inset 0 -3px 0 rgba(0,0,0,0.15)' }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B1B2E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14366B" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
               <path d="M9 12l2 2 4-4" />
             </svg>
           </div>
           <div>
             <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 22, color: '#fff', letterSpacing: '0.02em', lineHeight: 1.05 }}>
-              ARB <span style={{ color: '#00B09C' }}>AI</span> Agent
+              ARB <span style={{ color: '#1FBCD4' }}>AI</span> Agent
             </div>
             {brand.company && (
               <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11.5, fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
@@ -99,7 +99,7 @@ export default function LoginPage() {
 
         {/* Headline + body */}
         <div style={{ marginBottom: 'auto', marginTop: 64 }}>
-          <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12.5, fontWeight: 600, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#00B09C', marginBottom: 12 }}>
+          <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12.5, fontWeight: 600, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#1FBCD4', marginBottom: 12 }}>
             Intelligent Architecture Governance
           </div>
           <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 40, color: '#fff', lineHeight: 1.15, margin: 0, whiteSpace: 'nowrap' }}>
@@ -115,7 +115,7 @@ export default function LoginPage() {
             {STATS.map(s => (
               <div key={s.label}
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '16px 12px', textAlign: 'center' }}>
-                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 26, color: '#00B09C' }}>{s.value}</div>
+                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 26, color: '#1FBCD4' }}>{s.value}</div>
                 <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12.5, color: 'rgba(255,255,255,0.45)', marginTop: 4, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{s.label}</div>
               </div>
             ))}
@@ -171,14 +171,14 @@ export default function LoginPage() {
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-3 mb-10">
             <div className="w-9 h-9 rounded-[10px] grid place-items-center flex-shrink-0"
-              style={{ background: '#00B09C', boxShadow: 'inset 0 -2px 0 rgba(0,0,0,0.15)' }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B1B2E" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              style={{ background: '#1FBCD4', boxShadow: 'inset 0 -2px 0 rgba(0,0,0,0.15)' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#14366B" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
                 <path d="M9 12l2 2 4-4" />
               </svg>
             </div>
-            <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 18, color: '#1A2D45' }}>
-              ARB <span style={{ color: '#00B09C' }}>AI</span> Agent
+            <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 18, color: '#1E4A82' }}>
+              ARB <span style={{ color: '#1FBCD4' }}>AI</span> Agent
             </div>
           </div>
 
@@ -210,7 +210,7 @@ export default function LoginPage() {
                     outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit',
                     transition: 'border-color 0.15s',
                   }}
-                  onFocus={e => { e.target.style.borderColor = '#00B09C'; e.target.style.background = '#fff' }}
+                  onFocus={e => { e.target.style.borderColor = '#1FBCD4'; e.target.style.background = '#fff' }}
                   onBlur={e  => { e.target.style.borderColor = '#D9E2EA'; e.target.style.background = '#F4F7FA' }}
                 />
               </div>
@@ -233,7 +233,7 @@ export default function LoginPage() {
                     outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit',
                     transition: 'border-color 0.15s',
                   }}
-                  onFocus={e => { e.target.style.borderColor = '#00B09C'; e.target.style.background = '#fff' }}
+                  onFocus={e => { e.target.style.borderColor = '#1FBCD4'; e.target.style.background = '#fff' }}
                   onBlur={e  => { e.target.style.borderColor = '#D9E2EA'; e.target.style.background = '#F4F7FA' }}
                 />
               </div>
@@ -251,11 +251,11 @@ export default function LoginPage() {
                 disabled={loading}
                 style={{
                   width: '100%', height: 44, borderRadius: 8, border: 'none',
-                  background: loading ? '#4DB8AB' : '#00B09C',
+                  background: loading ? '#4FCFE2' : '#1FBCD4',
                   color: '#fff', fontFamily: "'Barlow Condensed', sans-serif",
                   fontWeight: 700, fontSize: 15, letterSpacing: '0.06em', textTransform: 'uppercase',
                   cursor: loading ? 'not-allowed' : 'pointer',
-                  transition: 'background 0.15s', boxShadow: '0 2px 8px rgba(0,176,156,0.3)',
+                  transition: 'background 0.15s', boxShadow: '0 2px 8px rgba(31,188,212,0.3)',
                 }}
               >
                 {loading ? 'Signing in…' : 'Sign In'}

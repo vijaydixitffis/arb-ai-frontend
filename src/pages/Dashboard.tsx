@@ -50,8 +50,8 @@ function toColumn(status: SubmissionStatus): Column {
 const DECISION_META: Record<string, { label: string; tone: PillTone }> = {
   approve:                 { label: 'Approved',           tone: 'green' },
   approved:                { label: 'Approved',           tone: 'green' },
-  approve_with_conditions: { label: 'Approve · w/ Actions', tone: 'teal' },
-  conditionally_approved:  { label: 'Approve · w/ Actions', tone: 'teal' },
+  approve_with_conditions: { label: 'Approve · w/ Actions', tone: 'turquoise' },
+  conditionally_approved:  { label: 'Approve · w/ Actions', tone: 'turquoise' },
   defer:                   { label: 'Deferred',           tone: 'amber' },
   deferred:                { label: 'Deferred',           tone: 'amber' },
   reject:                  { label: 'Rejected',           tone: 'red' },
@@ -94,8 +94,8 @@ function GovernanceStrip({ reviews, isSA }: { reviews: Review[]; isSA: boolean }
   const total      = reviews.length
 
   const saStats = [
-    { k: 'In flight',    v: inflight,  sub: `across ${Math.max(1, inflight)} gate${inflight !== 1 ? 's' : ''}`, color: '#00B09C', spark: [3,4,3,5,4,inflight] },
-    { k: 'Awaiting EA',  v: awaitingEA, sub: 'pending decision', color: '#D98A00', spark: [1,2,1,2,3,awaitingEA] },
+    { k: 'In flight',    v: inflight,  sub: `across ${Math.max(1, inflight)} gate${inflight !== 1 ? 's' : ''}`, color: '#1FBCD4', spark: [3,4,3,5,4,inflight] },
+    { k: 'Awaiting EA',  v: awaitingEA, sub: 'pending decision', color: '#E59500', spark: [1,2,1,2,3,awaitingEA] },
     { k: 'Approved YTD', v: approved,  sub: 'total approved',   color: '#1FA567', spark: [6,7,8,9,10,approved] },
     { k: 'Returned',     v: returned,  sub: 'returned or deferred', color: '#E59500', spark: [3,2,4,2,3,returned] },
   ]
@@ -103,7 +103,7 @@ function GovernanceStrip({ reviews, isSA }: { reviews: Review[]; isSA: boolean }
     { k: 'Awaiting decision', v: pending,   sub: 'in your queue',         color: '#D74A40', spark: [3,4,3,5,4,pending] },
     { k: 'AI low-confidence', v: 0,         sub: 'flagged for deep review', color: '#E59500', spark: [1,2,1,2,0,0] },
     { k: 'Decisions this wk', v: approved,  sub: 'approved this period',   color: '#1FA567', spark: [6,7,8,9,10,approved] },
-    { k: 'Total reviews',     v: total,     sub: 'all time',               color: '#00B09C', spark: [3,2,4,2,3,total] },
+    { k: 'Total reviews',     v: total,     sub: 'all time',               color: '#1FBCD4', spark: [3,2,4,2,3,total] },
   ]
   const stats = isSA ? saStats : eaStats
 
@@ -175,7 +175,7 @@ function KanbanCard({ review, col, onClick }: {
           </div>
           {/* simple progress indicator */}
           <div className="h-[4px] rounded-full overflow-hidden bg-line-soft">
-            <div className="h-full rounded-full bg-teal-500" style={{ width: '35%' }} />
+            <div className="h-full rounded-full bg-turquoise-500" style={{ width: '35%' }} />
           </div>
         </div>
       )}
@@ -187,7 +187,7 @@ function KanbanCard({ review, col, onClick }: {
         </div>
       ) : (
         <div className="mt-2.5 flex items-center gap-2 text-[13px] text-ink-500">
-          <span className="w-2 h-2 rounded-full bg-teal-500 flex-shrink-0" />
+          <span className="w-2 h-2 rounded-full bg-turquoise-500 flex-shrink-0" />
           Ready for AI agent
           <span className="ml-auto text-[13px]">in queue</span>
         </div>
@@ -195,16 +195,16 @@ function KanbanCard({ review, col, onClick }: {
 
       {col === 'analysing' && (
         <div className="mt-2.5">
-          <div className="flex items-center gap-2 text-[13px] text-teal-700 mb-1.5">
+          <div className="flex items-center gap-2 text-[13px] text-turquoise-700 mb-1.5">
             <span
-              className="w-2 h-2 rounded-full bg-teal-500 flex-shrink-0 animate-pulse"
+              className="w-2 h-2 rounded-full bg-turquoise-500 flex-shrink-0 animate-pulse"
             />
             AI agent analysing
             <span className="ml-auto text-ink-500 text-[13px]">processing…</span>
           </div>
-          <div className="h-[4px] rounded-full overflow-hidden bg-teal-100">
+          <div className="h-[4px] rounded-full overflow-hidden bg-turquoise-100">
             <div
-              className="h-full rounded-full bg-teal-500 animate-pulse"
+              className="h-full rounded-full bg-turquoise-500 animate-pulse"
               style={{ width: '70%' }}
             />
           </div>
@@ -218,7 +218,7 @@ function KanbanCard({ review, col, onClick }: {
             <DomainStrip scores={{}} domains={domains} />
           </div>
           <div className="mt-2.5 flex items-center gap-2">
-            <Pill tone="teal" dot>Awaiting EA decision</Pill>
+            <Pill tone="turquoise" dot>Awaiting EA decision</Pill>
           </div>
         </>
       )}
@@ -583,9 +583,9 @@ function EADashboard({
                 .map((r, i, arr) => {
                   const d = decisionOf(r)
                   const dotColor: Record<PillTone, string> = {
-                    green: 'bg-rag-green-500', teal: 'bg-teal-500',
+                    green: 'bg-rag-green-500', turquoise: 'bg-turquoise-500',
                     amber: 'bg-rag-amber-500', red: 'bg-rag-red-500',
-                    gold: 'bg-gold-500', navy: 'bg-navy-700', gray: 'bg-ink-300',
+                    navy: 'bg-navy-700', gray: 'bg-ink-300',
                   }
                   return (
                     <div

@@ -56,13 +56,13 @@ export default function Sidebar() {
           onClick={() => navigate(path)}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
             active
-              ? 'bg-teal-500/15 text-teal-400 font-medium'
+              ? 'bg-turquoise-500/15 text-turquoise-400 font-medium'
               : 'text-slate-400 hover:text-white hover:bg-white/5'
           }`}
         >
           <Icon className="w-4 h-4 flex-shrink-0" />
           <span>{label}</span>
-          {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-teal-400" />}
+          {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-turquoise-400" />}
         </button>
       </li>
     )
@@ -74,12 +74,12 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="px-5 py-6 border-b border-slate-700/50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 bg-turquoise-600 rounded-lg flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-sm tracking-tight">ARB</span>
           </div>
           <div>
             <h1 className="font-bold text-base text-white leading-tight">
-              ARB <span className="text-teal-400">AI</span> Agent
+              ARB <span className="text-turquoise-400">AI</span> Agent
             </h1>
             <p className="text-xs text-slate-400 mt-0.5">{brand.tagline}</p>
           </div>
@@ -119,7 +119,7 @@ export default function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">{user?.name}</p>
-            <p className="text-xs text-teal-400">{roleLabel[user?.role || ''] ?? user?.role}</p>
+            <p className="text-xs text-turquoise-400">{roleLabel[user?.role || ''] ?? user?.role}</p>
           </div>
         </div>
         <button

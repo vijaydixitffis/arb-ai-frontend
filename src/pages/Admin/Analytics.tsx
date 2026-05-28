@@ -45,7 +45,7 @@ export default function Analytics() {
     const map: Record<string, string> = {
       approved: 'bg-green-100 text-green-700',
       rejected: 'bg-red-100 text-red-700',
-      reviewing: 'bg-teal-100 text-teal-700',
+      reviewing: 'bg-turquoise-100 text-turquoise-700',
       submitted: 'bg-blue-100 text-blue-700',
       deferred: 'bg-slate-100 text-slate-600',
     }
@@ -62,7 +62,7 @@ export default function Analytics() {
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <div className="flex items-center gap-3 mb-2">
-        <div className="w-9 h-9 bg-teal-600 rounded-lg flex items-center justify-center">
+        <div className="w-9 h-9 bg-turquoise-600 rounded-lg flex items-center justify-center">
           <BarChart3 className="w-5 h-5 text-white" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900">Analytics</h1>
@@ -80,7 +80,7 @@ export default function Analytics() {
 
       {analyticsLoading ? (
         <div className="flex items-center gap-2 text-slate-400 py-12">
-          <div className="w-4 h-4 border-2 border-slate-200 border-t-teal-500 rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-slate-200 border-t-turquoise-500 rounded-full animate-spin" />
           Loading analytics…
         </div>
       ) : (
@@ -92,7 +92,7 @@ export default function Analytics() {
               <StatCard label="Pending"          value={summary.pending_reviews}   icon={Clock}       color="text-amber-600" />
               <StatCard label="Approved"         value={summary.approved_reviews}  icon={CheckCircle} color="text-green-600" />
               <StatCard label="Rejected"         value={summary.rejected_reviews}  icon={XCircle}     color="text-red-600"   />
-              <StatCard label="This Month"       value={summary.reviews_this_month} icon={TrendingUp}  color="text-teal-600"  />
+              <StatCard label="This Month"       value={summary.reviews_this_month} icon={TrendingUp}  color="text-turquoise-600"  />
               <StatCard
                 label="Approval Rate"
                 value={summary.approval_rate != null ? `${summary.approval_rate}%` : '—'}
@@ -104,7 +104,7 @@ export default function Analytics() {
                 label="Avg Domain Score"
                 value={summary.avg_domain_score != null ? summary.avg_domain_score.toFixed(2) : '—'}
                 icon={BarChart3}
-                color="text-teal-600"
+                color="text-turquoise-600"
                 sub="out of 5.0"
               />
               <StatCard label="Deferred" value={summary.deferred_reviews} icon={AlertCircle} color="text-slate-500" />

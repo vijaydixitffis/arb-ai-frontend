@@ -49,28 +49,28 @@ function DomainDrawer({ domain, onClose, onSave }: DrawerProps) {
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Display Name</label>
             <input value={name} onChange={e => setName(e.target.value)}
-              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Description</label>
             <textarea value={description} onChange={e => setDesc(e.target.value)} rows={3}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" />
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500 resize-none" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Color</label>
               <input value={color} onChange={e => setColor(e.target.value)} placeholder="#3b82f6"
-                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Icon (emoji)</label>
               <input value={icon} onChange={e => setIcon(e.target.value)} placeholder="🏗️"
-                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => setIsActive(!isActive)}
-              className={`relative w-10 h-5 rounded-full transition-colors ${isActive ? 'bg-teal-500' : 'bg-slate-200'}`}>
+              className={`relative w-10 h-5 rounded-full transition-colors ${isActive ? 'bg-turquoise-500' : 'bg-slate-200'}`}>
               <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${isActive ? 'translate-x-5' : 'translate-x-0.5'}`} />
             </button>
             <span className="text-sm text-slate-600">{isActive ? 'Active — visible to SA/EA' : 'Inactive — hidden from submissions'}</span>
@@ -78,14 +78,14 @@ function DomainDrawer({ domain, onClose, onSave }: DrawerProps) {
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Change Reason</label>
             <input value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Deprecating legacy domain"
-              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
           </div>
           {err && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{err}</p>}
         </div>
         <div className="px-6 py-4 border-t border-slate-100 flex gap-3">
           <button onClick={onClose} className="flex-1 h-10 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50">Cancel</button>
           <button onClick={handleSave} disabled={saving}
-            className="flex-1 h-10 bg-teal-600 text-white rounded-lg text-sm font-semibold hover:bg-teal-700 disabled:opacity-50">
+            className="flex-1 h-10 bg-turquoise-600 text-white rounded-lg text-sm font-semibold hover:bg-turquoise-700 disabled:opacity-50">
             {saving ? 'Saving…' : 'Save Changes'}
           </button>
         </div>
@@ -117,7 +117,7 @@ export default function DomainManagement() {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <div className="flex items-center gap-3 mb-2">
-        <div className="w-9 h-9 bg-teal-600 rounded-lg flex items-center justify-center">
+        <div className="w-9 h-9 bg-turquoise-600 rounded-lg flex items-center justify-center">
           <Globe className="w-5 h-5 text-white" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900">Domain Management</h1>
@@ -128,7 +128,7 @@ export default function DomainManagement() {
 
       {domainsLoading ? (
         <div className="flex items-center gap-2 text-slate-400 py-8">
-          <div className="w-4 h-4 border-2 border-slate-200 border-t-teal-500 rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-slate-200 border-t-turquoise-500 rounded-full animate-spin" />
           Loading domains…
         </div>
       ) : (
@@ -157,13 +157,13 @@ export default function DomainManagement() {
                   className="p-2 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-40"
                 >
                   {d.is_active
-                    ? <ToggleRight className="w-5 h-5 text-teal-600" />
+                    ? <ToggleRight className="w-5 h-5 text-turquoise-600" />
                     : <ToggleLeft className="w-5 h-5 text-slate-400" />
                   }
                 </button>
                 <button
                   onClick={() => setEditDomain(d)}
-                  className="flex items-center gap-1.5 px-3 h-9 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 transition-colors"
+                  className="flex items-center gap-1.5 px-3 h-9 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-turquoise-50 hover:border-turquoise-300 hover:text-turquoise-700 transition-colors"
                 >
                   <Pencil className="w-3.5 h-3.5" /> Edit
                 </button>

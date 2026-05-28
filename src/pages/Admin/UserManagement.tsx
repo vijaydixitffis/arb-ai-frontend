@@ -15,7 +15,7 @@ const ROLE_LABEL: Record<string, string> = {
 const ROLE_BADGE: Record<string, string> = {
   solution_architect:  'bg-blue-100 text-blue-700',
   enterprise_architect:'bg-purple-100 text-purple-700',
-  arb_admin:           'bg-teal-100 text-teal-700',
+  arb_admin:           'bg-turquoise-100 text-turquoise-700',
   super_admin:         'bg-amber-100 text-amber-700',
 }
 
@@ -67,7 +67,7 @@ function UserDrawer({ user, onClose, onSave }: DrawerProps) {
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
               <input value={email} onChange={e => setEmail(e.target.value)} type="email" placeholder="user@org.com"
-                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
             </div>
           )}
           <div>
@@ -75,18 +75,18 @@ function UserDrawer({ user, onClose, onSave }: DrawerProps) {
               {isEdit ? 'New Password (leave blank to keep)' : 'Password'}
             </label>
             <input value={password} onChange={e => setPassword(e.target.value)} type="password" placeholder="••••••••"
-              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Role</label>
             <select value={role} onChange={e => setRole(e.target.value as UserRole)}
-              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white">
+              className="w-full h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500 bg-white">
               {ALL_ROLES.filter(r => r !== 'super_admin').map(r => <option key={r} value={r}>{ROLE_LABEL[r] ?? r}</option>)}
             </select>
           </div>
           <div className="flex items-center gap-3">
             <input type="checkbox" id="isActive" checked={isActive} onChange={e => setIsActive(e.target.checked)}
-              className="w-4 h-4 accent-teal-600" />
+              className="w-4 h-4 accent-turquoise-600" />
             <label htmlFor="isActive" className="text-sm text-slate-700">Active account</label>
           </div>
           {err && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{err}</p>}
@@ -94,7 +94,7 @@ function UserDrawer({ user, onClose, onSave }: DrawerProps) {
         <div className="px-6 py-4 border-t border-slate-100 flex gap-3">
           <button onClick={onClose} className="flex-1 h-10 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50">Cancel</button>
           <button onClick={handleSave} disabled={saving}
-            className="flex-1 h-10 bg-teal-600 text-white rounded-lg text-sm font-semibold hover:bg-teal-700 disabled:opacity-50">
+            className="flex-1 h-10 bg-turquoise-600 text-white rounded-lg text-sm font-semibold hover:bg-turquoise-700 disabled:opacity-50">
             {saving ? 'Saving…' : 'Save'}
           </button>
         </div>
@@ -134,7 +134,7 @@ export default function UserManagement() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-9 h-9 bg-teal-600 rounded-lg flex items-center justify-center">
+            <div className="w-9 h-9 bg-turquoise-600 rounded-lg flex items-center justify-center">
               <Users className="w-5 h-5 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
@@ -143,7 +143,7 @@ export default function UserManagement() {
         </div>
         <button
           onClick={() => setDrawerUser(null)}
-          className="flex items-center gap-2 px-4 h-10 bg-teal-600 text-white rounded-lg text-sm font-semibold hover:bg-teal-700"
+          className="flex items-center gap-2 px-4 h-10 bg-turquoise-600 text-white rounded-lg text-sm font-semibold hover:bg-turquoise-700"
         >
           <Plus className="w-4 h-4" /> New User
         </button>
@@ -153,13 +153,13 @@ export default function UserManagement() {
         <input
           value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Search by email or role…"
-          className="w-full max-w-sm h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="w-full max-w-sm h-10 px-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-turquoise-500"
         />
       </div>
 
       {usersLoading ? (
         <div className="flex items-center gap-2 text-slate-400 py-8">
-          <div className="w-4 h-4 border-2 border-slate-200 border-t-teal-500 rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-slate-200 border-t-turquoise-500 rounded-full animate-spin" />
           Loading users…
         </div>
       ) : (
@@ -199,7 +199,7 @@ export default function UserManagement() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1 justify-end">
                       <button onClick={() => setDrawerUser(u)} title="Edit user"
-                        className="p-1.5 hover:bg-teal-50 rounded text-slate-400 hover:text-teal-600 transition-colors">
+                        className="p-1.5 hover:bg-turquoise-50 rounded text-slate-400 hover:text-turquoise-600 transition-colors">
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       {u.is_active && (

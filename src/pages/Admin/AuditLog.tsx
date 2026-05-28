@@ -93,7 +93,7 @@ export default function AuditLog() {
     <div className="p-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-teal-600 rounded-lg flex items-center justify-center">
+          <div className="w-9 h-9 bg-turquoise-600 rounded-lg flex items-center justify-center">
             <ScrollText className="w-5 h-5 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Audit Log</h1>
@@ -117,12 +117,12 @@ export default function AuditLog() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search by user, field, reason…"
-          className="h-9 px-3 border border-slate-200 rounded-lg text-sm w-64 focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="h-9 px-3 border border-slate-200 rounded-lg text-sm w-64 focus:outline-none focus:ring-2 focus:ring-turquoise-500"
         />
         <select
           value={tableFilter}
           onChange={e => setTableFilter(e.target.value)}
-          className="h-9 px-3 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="h-9 px-3 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-turquoise-500"
         >
           <option value="">All tables</option>
           {tables.map(t => (
@@ -134,7 +134,7 @@ export default function AuditLog() {
 
       {auditLoading ? (
         <div className="flex items-center gap-2 text-slate-400 py-8">
-          <div className="w-4 h-4 border-2 border-slate-200 border-t-teal-500 rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-slate-200 border-t-turquoise-500 rounded-full animate-spin" />
           Loading audit log…
         </div>
       ) : (
